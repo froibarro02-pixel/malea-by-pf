@@ -14,11 +14,6 @@ let auth = null;
 
 try {
 
-    /*
-     * Supports firebaseConfig from
-     * firebase/firebase-config.js
-     */
-
     let config = null;
 
     if (
@@ -35,7 +30,6 @@ try {
 
     }
 
-
     if (!config) {
 
         throw new Error(
@@ -44,16 +38,13 @@ try {
 
     }
 
-
     if (!firebase.apps.length) {
 
         firebase.initializeApp(config);
 
     }
 
-
     auth = firebase.auth();
-
 
 } catch (error) {
 
@@ -72,14 +63,13 @@ try {
 const PROJECT_ID =
     "malea-by-pf";
 
-
 const API_KEY =
     (
+        auth &&
         firebase.apps.length
-            ? firebase.app().options.apiKey
-            : ""
-    );
-
+    )
+        ? firebase.app().options.apiKey
+        : "";
 
 const FIRESTORE_URL =
     `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/dresses`;
@@ -231,10 +221,8 @@ async function getFirestoreHeaders() {
 
     }
 
-
     const user =
         auth.currentUser;
-
 
     if (!user) {
 
@@ -244,10 +232,8 @@ async function getFirestoreHeaders() {
 
     }
 
-
     const token =
         await user.getIdToken();
-
 
     return {
 
@@ -281,7 +267,6 @@ function firestoreValue(value) {
 
     }
 
-
     return {
 
         stringValue:
@@ -300,7 +285,6 @@ function convertFirestoreDocument(document) {
 
     const fields =
         document.fields || {};
-
 
     return {
 
@@ -360,7 +344,6 @@ async function loadDresses() {
         const headers =
             await getFirestoreHeaders();
 
-
         const response =
             await fetch(
                 `${FIRESTORE_URL}?key=${API_KEY}`,
@@ -373,7 +356,6 @@ async function loadDresses() {
                 }
             );
 
-
         if (!response.ok) {
 
             throw new Error(
@@ -382,10 +364,8 @@ async function loadDresses() {
 
         }
 
-
         const data =
             await response.json();
-
 
         dresses =
             (data.documents || [])
@@ -402,13 +382,11 @@ async function loadDresses() {
                         )
                 );
 
-
         renderInventory();
 
         updateDashboardStats();
 
         renderDashboardRecent();
-
 
     } catch (error) {
 
@@ -417,6 +395,14 @@ async function loadDresses() {
             error
         );
 
+        if (
+            auth &&
+            !auth.currentUser
+        ) {
+
+            return;
+
+        }
 
         showError(
             "Unable to load the dress inventory.\n\n" +
@@ -447,7 +433,6 @@ async function handlePhotoSelection(event) {
     const file =
         event.target.files[0];
 
-
     if (!file) {
 
         selectedPhotoData = "";
@@ -457,7 +442,6 @@ async function handlePhotoSelection(event) {
         return;
 
     }
-
 
     if (!file.type.startsWith("image/")) {
 
@@ -471,17 +455,14 @@ async function handlePhotoSelection(event) {
 
     }
 
-
     try {
 
         selectedPhotoData =
             await compressImage(file);
 
-
         showPhotoPreview(
             selectedPhotoData
         );
-
 
     } catch (error) {
 
@@ -489,7 +470,6 @@ async function handlePhotoSelection(event) {
             "Photo processing error:",
             error
         );
-
 
         alert(
             "Unable to process this photo."
@@ -512,12 +492,10 @@ function compressImage(file) {
             const reader =
                 new FileReader();
 
-
             reader.onload = event => {
 
                 const image =
                     new Image();
-
 
                 image.onload = () => {
 
@@ -527,13 +505,11 @@ function compressImage(file) {
                     const maxHeight =
                         1000;
 
-
                     let width =
                         image.width;
 
                     let height =
                         image.height;
-
 
                     const ratio =
                         Math.min(
@@ -542,24 +518,20 @@ function compressImage(file) {
                             1
                         );
 
-
                     width =
                         Math.round(
                             width * ratio
                         );
-
 
                     height =
                         Math.round(
                             height * ratio
                         );
 
-
                     const canvas =
                         document.createElement(
                             "canvas"
                         );
-
 
                     canvas.width =
                         width;
@@ -567,12 +539,10 @@ function compressImage(file) {
                     canvas.height =
                         height;
 
-
                     const context =
                         canvas.getContext(
                             "2d"
                         );
-
 
                     context.drawImage(
                         image,
@@ -582,13 +552,11 @@ function compressImage(file) {
                         height
                     );
 
-
                     const compressed =
                         canvas.toDataURL(
                             "image/jpeg",
                             0.70
                         );
-
 
                     resolve(
                         compressed
@@ -596,20 +564,16 @@ function compressImage(file) {
 
                 };
 
-
                 image.onerror =
                     reject;
-
 
                 image.src =
                     event.target.result;
 
             };
 
-
             reader.onerror =
                 reject;
-
 
             reader.readAsDataURL(file);
 
@@ -627,7 +591,6 @@ function showPhotoPreview(photo) {
 
     if (!photoPreview) return;
 
-
     if (!photo) {
 
         photoPreview.innerHTML =
@@ -637,11 +600,10 @@ function showPhotoPreview(photo) {
 
     }
 
-
     photoPreview.innerHTML = `
 
         <img
-            src="${photo}"
+            src="${escapeAttribute(photo)}"
             alt="Dress preview"
         >
 
@@ -658,7 +620,6 @@ function renderInventory() {
 
     if (!inventoryGrid) return;
 
-
     const searchTerm =
         searchInput
             ? searchInput.value
@@ -666,18 +627,15 @@ function renderInventory() {
                 .trim()
             : "";
 
-
     const selectedCategory =
         categoryFilter
             ? categoryFilter.value
             : "";
 
-
     const selectedAvailability =
         availabilityFilter
             ? availabilityFilter.value
             : "";
-
 
     const filteredDresses =
         dresses.filter(dress => {
@@ -693,7 +651,6 @@ function renderInventory() {
             ]
                 .join(" ")
                 .toLowerCase();
-
 
             return (
 
@@ -717,9 +674,7 @@ function renderInventory() {
 
         });
 
-
     inventoryGrid.innerHTML = "";
-
 
     if (filteredDresses.length === 0) {
 
@@ -734,14 +689,12 @@ function renderInventory() {
 
     }
 
-
     if (emptyState) {
 
         emptyState.style.display =
             "none";
 
     }
-
 
     filteredDresses.forEach(dress => {
 
@@ -750,15 +703,12 @@ function renderInventory() {
                 "div"
             );
 
-
         card.className =
             "dress-card";
-
 
         const availability =
             dress.availability ||
             "Available";
-
 
         const photoHTML =
             dress.photo
@@ -792,7 +742,6 @@ function renderInventory() {
 
                 `;
 
-
         card.innerHTML = `
 
             <div class="dress-photo">
@@ -809,7 +758,6 @@ function renderInventory() {
 
             </div>
 
-
             <div class="dress-body">
 
                 <div class="dress-top">
@@ -825,7 +773,6 @@ function renderInventory() {
 
                         </div>
 
-
                         <div class="dress-category">
 
                             ${escapeHTML(
@@ -838,7 +785,6 @@ function renderInventory() {
                     </div>
 
                 </div>
-
 
                 <div class="dress-meta">
 
@@ -859,7 +805,6 @@ function renderInventory() {
 
                     </div>
 
-
                     <div>
 
                         <span>
@@ -879,7 +824,6 @@ function renderInventory() {
 
                 </div>
 
-
                 ${
                     dress.notes
                     ? `
@@ -895,7 +839,6 @@ function renderInventory() {
                     `
                     : ""
                 }
-
 
                 <div class="dress-price">
 
@@ -922,7 +865,6 @@ function renderInventory() {
 
                 </div>
 
-
                 <div class="dress-actions">
 
                     <button
@@ -932,7 +874,6 @@ function renderInventory() {
                     >
                         Edit
                     </button>
-
 
                     <button
                         type="button"
@@ -947,7 +888,6 @@ function renderInventory() {
             </div>
 
         `;
-
 
         inventoryGrid.appendChild(
             card
@@ -978,13 +918,11 @@ function openAddDressModal() {
 
     if (!dressModal) return;
 
-
     if (dressForm) {
 
         dressForm.reset();
 
     }
-
 
     if (dressId) {
 
@@ -992,17 +930,14 @@ function openAddDressModal() {
 
     }
 
-
     selectedPhotoData = "";
 
     showPhotoPreview("");
-
 
     const modalTitle =
         document.getElementById(
             "modalTitle"
         );
-
 
     if (modalTitle) {
 
@@ -1010,7 +945,6 @@ function openAddDressModal() {
             "Add Dress";
 
     }
-
 
     dressModal.classList.add(
         "active"
@@ -1039,11 +973,9 @@ function closeDressModal() {
 
     if (!dressModal) return;
 
-
     dressModal.classList.remove(
         "active"
     );
-
 
     if (dressForm) {
 
@@ -1051,13 +983,11 @@ function closeDressModal() {
 
     }
 
-
     if (dressId) {
 
         dressId.value = "";
 
     }
-
 
     selectedPhotoData = "";
 
@@ -1084,10 +1014,8 @@ async function saveDress(event) {
 
     event.preventDefault();
 
-
     const name =
         dressName.value.trim();
-
 
     if (!name) {
 
@@ -1099,10 +1027,8 @@ async function saveDress(event) {
 
     }
 
-
     const category =
         dressCategory.value;
-
 
     if (!category) {
 
@@ -1114,32 +1040,25 @@ async function saveDress(event) {
 
     }
 
-
     const size =
         dressSize.value.trim();
-
 
     const price =
         Number(
             dressPrice.value
         ) || 0;
 
-
     const availability =
         dressAvailability.value;
-
 
     const color =
         dressColor.value.trim();
 
-
     const notes =
         dressNotes.value.trim();
 
-
     const now =
         new Date().toISOString();
-
 
     const fields = {
 
@@ -1174,7 +1093,6 @@ async function saveDress(event) {
 
     };
 
-
     try {
 
         // ==================================
@@ -1195,7 +1113,6 @@ async function saveDress(event) {
                             dressId.value
                     );
 
-
                 if (
                     existingDress &&
                     existingDress.photo
@@ -1210,11 +1127,9 @@ async function saveDress(event) {
 
             }
 
-
             const documentURL =
                 `${FIRESTORE_URL}/${encodeURIComponent(dressId.value)}` +
                 `?key=${API_KEY}`;
-
 
             const response =
                 await fetch(
@@ -1234,7 +1149,6 @@ async function saveDress(event) {
                     }
                 );
 
-
             if (!response.ok) {
 
                 throw new Error(
@@ -1243,13 +1157,11 @@ async function saveDress(event) {
 
             }
 
-
             alert(
                 "Dress updated successfully."
             );
 
         }
-
 
         // ==================================
         // CREATE
@@ -1259,7 +1171,6 @@ async function saveDress(event) {
 
             fields.createdAt =
                 firestoreValue(now);
-
 
             const response =
                 await fetch(
@@ -1279,7 +1190,6 @@ async function saveDress(event) {
                     }
                 );
 
-
             if (!response.ok) {
 
                 throw new Error(
@@ -1288,18 +1198,15 @@ async function saveDress(event) {
 
             }
 
-
             alert(
                 "Dress added successfully."
             );
 
         }
 
-
         closeDressModal();
 
         await loadDresses();
-
 
     } catch (error) {
 
@@ -1307,7 +1214,6 @@ async function saveDress(event) {
             "Save error:",
             error
         );
-
 
         showError(
             "Unable to save the dress.\n\n" +
@@ -1331,7 +1237,6 @@ function editDress(id) {
                 item.id === id
         );
 
-
     if (!dress) {
 
         alert(
@@ -1341,7 +1246,6 @@ function editDress(id) {
         return;
 
     }
-
 
     dressId.value =
         dress.id;
@@ -1367,21 +1271,17 @@ function editDress(id) {
     dressNotes.value =
         dress.notes;
 
-
     selectedPhotoData =
         dress.photo || "";
-
 
     showPhotoPreview(
         dress.photo || ""
     );
 
-
     const modalTitle =
         document.getElementById(
             "modalTitle"
         );
-
 
     if (modalTitle) {
 
@@ -1389,7 +1289,6 @@ function editDress(id) {
             "Edit Dress";
 
     }
-
 
     dressModal.classList.add(
         "active"
@@ -1410,12 +1309,10 @@ async function removeDress(id) {
                 item.id === id
         );
 
-
     const name =
         dress
             ? dress.name
             : "this dress";
-
 
     if (
         !confirm(
@@ -1428,13 +1325,11 @@ async function removeDress(id) {
 
     }
 
-
     try {
 
         const documentURL =
             `${FIRESTORE_URL}/${encodeURIComponent(id)}` +
             `?key=${API_KEY}`;
-
 
         const response =
             await fetch(
@@ -1449,7 +1344,6 @@ async function removeDress(id) {
                 }
             );
 
-
         if (!response.ok) {
 
             throw new Error(
@@ -1458,14 +1352,11 @@ async function removeDress(id) {
 
         }
 
-
         alert(
             "Dress deleted successfully."
         );
 
-
         await loadDresses();
-
 
     } catch (error) {
 
@@ -1473,7 +1364,6 @@ async function removeDress(id) {
             "Delete error:",
             error
         );
-
 
         showError(
             "Unable to delete the dress.\n\n" +
@@ -1512,7 +1402,6 @@ if (categoryFilter) {
 
 }
 
-
 if (availabilityFilter) {
 
     availabilityFilter.addEventListener(
@@ -1532,14 +1421,12 @@ function updateDashboardStats() {
     const total =
         dresses.length;
 
-
     const available =
         dresses.filter(
             dress =>
                 dress.availability ===
                 "Available"
         ).length;
-
 
     const reserved =
         dresses.filter(
@@ -1548,14 +1435,12 @@ function updateDashboardStats() {
                 "Reserved"
         ).length;
 
-
     const rented =
         dresses.filter(
             dress =>
                 dress.availability ===
                 "Rented"
         ).length;
-
 
     const statTotal =
         document.getElementById(
@@ -1577,14 +1462,12 @@ function updateDashboardStats() {
             "statRented"
         );
 
-
     if (statTotal) {
 
         statTotal.textContent =
             total;
 
     }
-
 
     if (statAvailable) {
 
@@ -1593,14 +1476,12 @@ function updateDashboardStats() {
 
     }
 
-
     if (statReserved) {
 
         statReserved.textContent =
             reserved;
 
     }
-
 
     if (statRented) {
 
@@ -1623,12 +1504,9 @@ function renderDashboardRecent() {
             "dashboardRecent"
         );
 
-
     if (!container) return;
 
-
     container.innerHTML = "";
-
 
     if (dresses.length === 0) {
 
@@ -1648,7 +1526,6 @@ function renderDashboardRecent() {
 
     }
 
-
     dresses
         .slice(0, 5)
         .forEach(dress => {
@@ -1658,10 +1535,8 @@ function renderDashboardRecent() {
                     "div"
                 );
 
-
             row.className =
                 "recent-row";
-
 
             row.innerHTML = `
 
@@ -1675,7 +1550,6 @@ function renderDashboardRecent() {
 
                     </strong>
 
-
                     <div class="recent-category">
 
                         ${escapeHTML(
@@ -1686,7 +1560,6 @@ function renderDashboardRecent() {
 
                 </div>
 
-
                 <span class="status ${getAvailabilityClass(dress.availability)}">
 
                     ${escapeHTML(
@@ -1696,7 +1569,6 @@ function renderDashboardRecent() {
                 </span>
 
             `;
-
 
             container.appendChild(
                 row
@@ -1721,12 +1593,10 @@ function showSection(sectionName) {
 
     });
 
-
     const selected =
         document.getElementById(
             sectionName + "Section"
         );
-
 
     if (selected) {
 
@@ -1736,7 +1606,6 @@ function showSection(sectionName) {
 
     }
 
-
     navItems.forEach(item => {
 
         item.classList.remove(
@@ -1745,12 +1614,10 @@ function showSection(sectionName) {
 
     });
 
-
     const activeButton =
         document.querySelector(
             `[data-section="${sectionName}"]`
         );
-
 
     if (activeButton) {
 
@@ -1759,7 +1626,6 @@ function showSection(sectionName) {
         );
 
     }
-
 
     if (pageTitles[sectionName]) {
 
@@ -1770,7 +1636,6 @@ function showSection(sectionName) {
 
         }
 
-
         if (pageSubtitle) {
 
             pageSubtitle.textContent =
@@ -1779,7 +1644,6 @@ function showSection(sectionName) {
         }
 
     }
-
 
     if (sidebar) {
 
@@ -1806,7 +1670,6 @@ navItems.forEach(button => {
                 button.getAttribute(
                     "data-section"
                 );
-
 
             showSection(
                 sectionName
@@ -1855,7 +1718,6 @@ if (mobileMenu) {
 
             event.stopPropagation();
 
-
             if (sidebar) {
 
                 sidebar.classList.toggle(
@@ -1880,11 +1742,9 @@ document.addEventListener(
 
         if (!sidebar) return;
 
-
         if (
             window.innerWidth > 1100
         ) return;
-
 
         if (
             sidebar.contains(
@@ -1892,14 +1752,12 @@ document.addEventListener(
             )
         ) return;
 
-
         if (
             mobileMenu &&
             mobileMenu.contains(
                 event.target
             )
         ) return;
-
 
         sidebar.classList.remove(
             "open"
@@ -1922,7 +1780,6 @@ document.addEventListener(
         ) {
 
             closeDressModal();
-
 
             if (sidebar) {
 
@@ -2040,16 +1897,13 @@ function createLoginScreen() {
 
     }
 
-
     const loginScreen =
         document.createElement(
             "div"
         );
 
-
     loginScreen.id =
         "adminLoginScreen";
-
 
     loginScreen.innerHTML = `
 
@@ -2063,16 +1917,13 @@ function createLoginScreen() {
 
             </div>
 
-
             <h1>
                 Maléa by PF
             </h1>
 
-
             <p class="admin-login-subtitle">
                 Admin Portal
             </p>
-
 
             <form id="adminLoginForm">
 
@@ -2092,7 +1943,6 @@ function createLoginScreen() {
 
                 </div>
 
-
                 <div class="admin-login-field">
 
                     <label for="adminPassword">
@@ -2109,7 +1959,6 @@ function createLoginScreen() {
 
                 </div>
 
-
                 <button
                     type="submit"
                     class="admin-login-button"
@@ -2117,7 +1966,6 @@ function createLoginScreen() {
                 >
                     Sign In
                 </button>
-
 
                 <div
                     id="adminLoginError"
@@ -2130,11 +1978,9 @@ function createLoginScreen() {
 
     `;
 
-
     document.body.appendChild(
         loginScreen
     );
-
 
     document
         .getElementById(
@@ -2156,7 +2002,6 @@ async function handleAdminLogin(event) {
 
     event.preventDefault();
 
-
     const email =
         document
             .getElementById(
@@ -2165,7 +2010,6 @@ async function handleAdminLogin(event) {
             .value
             .trim();
 
-
     const password =
         document
             .getElementById(
@@ -2173,27 +2017,22 @@ async function handleAdminLogin(event) {
             )
             .value;
 
-
     const button =
         document.getElementById(
             "adminLoginButton"
         );
-
 
     const errorBox =
         document.getElementById(
             "adminLoginError"
         );
 
-
     errorBox.textContent = "";
-
 
     button.disabled = true;
 
     button.textContent =
         "Signing in...";
-
 
     try {
 
@@ -2202,7 +2041,6 @@ async function handleAdminLogin(event) {
             password
         );
 
-
     } catch (error) {
 
         console.error(
@@ -2210,10 +2048,8 @@ async function handleAdminLogin(event) {
             error
         );
 
-
         let message =
             "Unable to sign in.";
-
 
         switch (error.code) {
 
@@ -2228,14 +2064,12 @@ async function handleAdminLogin(event) {
 
                 break;
 
-
             case "auth/invalid-email":
 
                 message =
                     "Please enter a valid email address.";
 
                 break;
-
 
             case "auth/too-many-requests":
 
@@ -2244,7 +2078,6 @@ async function handleAdminLogin(event) {
 
                 break;
 
-
             default:
 
                 message =
@@ -2252,10 +2085,8 @@ async function handleAdminLogin(event) {
 
         }
 
-
         errorBox.textContent =
             message;
-
 
         button.disabled = false;
 
@@ -2278,13 +2109,11 @@ function hideLoginScreen() {
             "adminLoginScreen"
         );
 
-
     if (loginScreen) {
 
         loginScreen.remove();
 
     }
-
 
     document.body.classList.remove(
         "admin-logged-out"
@@ -2303,7 +2132,6 @@ function showLoginScreen() {
         "admin-logged-out"
     );
 
-
     createLoginScreen();
 
 }
@@ -2313,24 +2141,33 @@ function showLoginScreen() {
 // LOGOUT
 // ==========================================
 
-async function logoutAdmin() {
+async function logoutAdmin(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+    }
 
     if (!auth) {
+
+        console.error(
+            "Firebase Authentication is not initialized."
+        );
 
         return;
 
     }
 
-
     try {
 
         await auth.signOut();
 
-
         console.log(
-            "Admin logged out."
+            "Admin logged out successfully."
         );
-
 
     } catch (error) {
 
@@ -2338,7 +2175,6 @@ async function logoutAdmin() {
             "Logout error:",
             error
         );
-
 
         alert(
             "Unable to log out. Please try again."
@@ -2355,20 +2191,16 @@ async function logoutAdmin() {
 
 function setupLogoutButton() {
 
-    /*
-     * First look for an ID.
-     * If your HTML uses a class instead,
-     * look for .logout-btn.
-     */
-
     const logoutButton =
         document.getElementById(
             "logoutButton"
         ) ||
         document.querySelector(
             ".logout-btn"
+        ) ||
+        document.querySelector(
+            "[data-logout]"
         );
-
 
     if (!logoutButton) {
 
@@ -2380,12 +2212,6 @@ function setupLogoutButton() {
 
     }
 
-
-    /*
-     * Prevent duplicate event listeners
-     * if this function is called again.
-     */
-
     if (
         logoutButton.dataset.logoutReady ===
         "true"
@@ -2395,20 +2221,12 @@ function setupLogoutButton() {
 
     }
 
-
     logoutButton.dataset.logoutReady =
         "true";
 
-
     logoutButton.addEventListener(
         "click",
-        event => {
-
-            event.preventDefault();
-
-            logoutAdmin();
-
-        }
+        logoutAdmin
     );
 
 }
@@ -2430,20 +2248,15 @@ if (auth) {
                     user.email
                 );
 
-
                 hideLoginScreen();
 
-
                 setupLogoutButton();
-
 
                 showSection(
                     "dashboard"
                 );
 
-
                 loadDresses();
-
 
             } else {
 
@@ -2451,6 +2264,13 @@ if (auth) {
                     "No authenticated admin."
                 );
 
+                dresses = [];
+
+                renderInventory();
+
+                updateDashboardStats();
+
+                renderDashboardRecent();
 
                 showLoginScreen();
 
