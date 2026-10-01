@@ -44,8 +44,15 @@
           <p id="pageSubtitle">Manage your dresses and rental availability.</p>
         </div>
         <div class="topbar-right">
-          <span class="admin-badge">ADMIN</span>
-        </div>
+  <span class="admin-badge">ADMIN</span>
+
+  <button
+    type="button"
+    class="logout-btn"
+    onclick="logoutAdmin()">
+    Logout
+  </button>
+</div>
       </header>
 
       <div class="content">
@@ -242,6 +249,9 @@
       </form>
     </div>
   </div> 
-  <script src="js/admin.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="firebase/firebase-config.js"></script>
+<script src="js/admin.js"></script>
 </body>
 </html>
