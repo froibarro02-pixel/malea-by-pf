@@ -2,18 +2,84 @@
 // MALÉA BY PF
 // ADMIN PANEL
 // DRESS INVENTORY
-// FIRESTORE REST API
+// FIRESTORE REST API + FIREBASE AUTH
 // ==========================================
+
+
+// ==========================================
+// FIREBASE AUTHENTICATION
+// ==========================================
+
+let auth = null;
+
+try {
+
+    /*
+     * Supports firebaseConfig from
+     * firebase/firebase-config.js
+     */
+
+    let config = null;
+
+    if (
+        typeof window.firebaseConfig !== "undefined"
+    ) {
+
+        config = window.firebaseConfig;
+
+    } else if (
+        typeof firebaseConfig !== "undefined"
+    ) {
+
+        config = firebaseConfig;
+
+    }
+
+
+    if (!config) {
+
+        throw new Error(
+            "Firebase configuration was not found."
+        );
+
+    }
+
+
+    if (!firebase.apps.length) {
+
+        firebase.initializeApp(config);
+
+    }
+
+
+    auth = firebase.auth();
+
+
+} catch (error) {
+
+    console.error(
+        "Firebase Authentication initialization error:",
+        error
+    );
+
+}
 
 
 // ==========================================
 // FIREBASE PROJECT
 // ==========================================
 
-const PROJECT_ID = "malea-by-pf";
+const PROJECT_ID =
+    "malea-by-pf";
+
 
 const API_KEY =
-    "AIzaSyCo6oYU8RpConNDMzBuS8CQyIFG2gm0kic";
+    (
+        firebase.apps.length
+            ? firebase.app().options.apiKey
+            : ""
+    );
+
 
 const FIRESTORE_URL =
     `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/dresses`;
@@ -152,6 +218,51 @@ const pageTitles = {
 
 
 // ==========================================
+// FIRESTORE AUTHORIZATION
+// ==========================================
+
+async function getFirestoreHeaders() {
+
+    if (!auth) {
+
+        throw new Error(
+            "Firebase Authentication is not initialized."
+        );
+
+    }
+
+
+    const user =
+        auth.currentUser;
+
+
+    if (!user) {
+
+        throw new Error(
+            "You must be logged in to access the inventory."
+        );
+
+    }
+
+
+    const token =
+        await user.getIdToken();
+
+
+    return {
+
+        "Content-Type":
+            "application/json",
+
+        "Authorization":
+            `Bearer ${token}`
+
+    };
+
+}
+
+
+// ==========================================
 // FIRESTORE VALUE
 // ==========================================
 
@@ -163,13 +274,19 @@ function firestoreValue(value) {
     ) {
 
         return {
+
             doubleValue: value
+
         };
 
     }
 
+
     return {
-        stringValue: String(value ?? "")
+
+        stringValue:
+            String(value ?? "")
+
     };
 
 }
@@ -183,6 +300,7 @@ function convertFirestoreDocument(document) {
 
     const fields =
         document.fields || {};
+
 
     return {
 
@@ -239,9 +357,20 @@ async function loadDresses() {
 
     try {
 
+        const headers =
+            await getFirestoreHeaders();
+
+
         const response =
             await fetch(
-                `${FIRESTORE_URL}?key=${API_KEY}`
+                `${FIRESTORE_URL}?key=${API_KEY}`,
+                {
+
+                    method: "GET",
+
+                    headers: headers
+
+                }
             );
 
 
@@ -260,11 +389,17 @@ async function loadDresses() {
 
         dresses =
             (data.documents || [])
-                .map(convertFirestoreDocument)
+                .map(
+                    convertFirestoreDocument
+                )
                 .sort(
                     (a, b) =>
-                        new Date(b.createdAt || 0) -
-                        new Date(a.createdAt || 0)
+                        new Date(
+                            b.createdAt || 0
+                        ) -
+                        new Date(
+                            a.createdAt || 0
+                        )
                 );
 
 
@@ -386,9 +521,11 @@ function compressImage(file) {
 
                 image.onload = () => {
 
-                    const maxWidth = 800;
+                    const maxWidth =
+                        800;
 
-                    const maxHeight = 1000;
+                    const maxHeight =
+                        1000;
 
 
                     let width =
@@ -609,7 +746,9 @@ function renderInventory() {
     filteredDresses.forEach(dress => {
 
         const card =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         card.className =
@@ -625,14 +764,18 @@ function renderInventory() {
             dress.photo
 
                 ? `
+
                     <img
                         class="dress-photo-image"
-                        src="${dress.photo}"
+                        src="${escapeAttribute(
+                            dress.photo
+                        )}"
                         alt="${escapeHTML(
                             dress.name ||
                             "Dress"
                         )}"
                     >
+
                 `
 
                 : `
@@ -655,7 +798,6 @@ function renderInventory() {
             <div class="dress-photo">
 
                 ${photoHTML}
-
 
                 <span class="status ${getAvailabilityClass(availability)}">
 
@@ -741,6 +883,7 @@ function renderInventory() {
                 ${
                     dress.notes
                     ? `
+
                         <div class="dress-notes">
 
                             ${escapeHTML(
@@ -748,6 +891,7 @@ function renderInventory() {
                             )}
 
                         </div>
+
                     `
                     : ""
                 }
@@ -766,8 +910,11 @@ function renderInventory() {
                         ).toLocaleString(
                             "en-PH",
                             {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
+                                minimumFractionDigits:
+                                    2,
+
+                                maximumFractionDigits:
+                                    2
                             }
                         )}
 
@@ -802,7 +949,9 @@ function renderInventory() {
         `;
 
 
-        inventoryGrid.appendChild(card);
+        inventoryGrid.appendChild(
+            card
+        );
 
     });
 
@@ -1037,11 +1186,6 @@ async function saveDress(event) {
             dressId.value
         ) {
 
-            /*
-             * If no new photo was selected,
-             * preserve the existing photo.
-             */
-
             if (!selectedPhotoData) {
 
                 const existingDress =
@@ -1079,12 +1223,8 @@ async function saveDress(event) {
 
                         method: "PATCH",
 
-                        headers: {
-
-                            "Content-Type":
-                                "application/json"
-
-                        },
+                        headers:
+                            await getFirestoreHeaders(),
 
                         body:
                             JSON.stringify({
@@ -1128,12 +1268,8 @@ async function saveDress(event) {
 
                         method: "POST",
 
-                        headers: {
-
-                            "Content-Type":
-                                "application/json"
-
-                        },
+                        headers:
+                            await getFirestoreHeaders(),
 
                         body:
                             JSON.stringify({
@@ -1304,7 +1440,12 @@ async function removeDress(id) {
             await fetch(
                 documentURL,
                 {
-                    method: "DELETE"
+
+                    method: "DELETE",
+
+                    headers:
+                        await getFirestoreHeaders()
+
                 }
             );
 
@@ -1416,24 +1557,57 @@ function updateDashboardStats() {
         ).length;
 
 
-    document.getElementById(
-        "statTotal"
-    ).textContent = total;
+    const statTotal =
+        document.getElementById(
+            "statTotal"
+        );
+
+    const statAvailable =
+        document.getElementById(
+            "statAvailable"
+        );
+
+    const statReserved =
+        document.getElementById(
+            "statReserved"
+        );
+
+    const statRented =
+        document.getElementById(
+            "statRented"
+        );
 
 
-    document.getElementById(
-        "statAvailable"
-    ).textContent = available;
+    if (statTotal) {
+
+        statTotal.textContent =
+            total;
+
+    }
 
 
-    document.getElementById(
-        "statReserved"
-    ).textContent = reserved;
+    if (statAvailable) {
+
+        statAvailable.textContent =
+            available;
+
+    }
 
 
-    document.getElementById(
-        "statRented"
-    ).textContent = rented;
+    if (statReserved) {
+
+        statReserved.textContent =
+            reserved;
+
+    }
+
+
+    if (statRented) {
+
+        statRented.textContent =
+            rented;
+
+    }
 
 }
 
@@ -1461,7 +1635,11 @@ function renderDashboardRecent() {
         container.innerHTML = `
 
             <div class="recent-row">
-                <span>No dresses added yet.</span>
+
+                <span>
+                    No dresses added yet.
+                </span>
+
             </div>
 
         `;
@@ -1497,6 +1675,7 @@ function renderDashboardRecent() {
 
                     </strong>
 
+
                     <div class="recent-category">
 
                         ${escapeHTML(
@@ -1519,7 +1698,9 @@ function renderDashboardRecent() {
             `;
 
 
-            container.appendChild(row);
+            container.appendChild(
+                row
+            );
 
         });
 
@@ -1582,11 +1763,20 @@ function showSection(sectionName) {
 
     if (pageTitles[sectionName]) {
 
-        pageTitle.textContent =
-            pageTitles[sectionName][0];
+        if (pageTitle) {
 
-        pageSubtitle.textContent =
-            pageTitles[sectionName][1];
+            pageTitle.textContent =
+                pageTitles[sectionName][0];
+
+        }
+
+
+        if (pageSubtitle) {
+
+            pageSubtitle.textContent =
+                pageTitles[sectionName][1];
+
+        }
 
     }
 
@@ -1601,6 +1791,10 @@ function showSection(sectionName) {
 
 }
 
+
+// ==========================================
+// SIDEBAR BUTTONS
+// ==========================================
 
 navItems.forEach(button => {
 
@@ -1625,7 +1819,7 @@ navItems.forEach(button => {
 
 
 // ==========================================
-// VIEW ALL
+// VIEW ALL BUTTONS
 // ==========================================
 
 document
@@ -1643,6 +1837,7 @@ document
                 );
 
             }
+
         );
 
     });
@@ -1728,9 +1923,14 @@ document.addEventListener(
 
             closeDressModal();
 
-            sidebar.classList.remove(
-                "open"
-            );
+
+            if (sidebar) {
+
+                sidebar.classList.remove(
+                    "open"
+                );
+
+            }
 
         }
 
@@ -1801,10 +2001,12 @@ function escapeHTML(value) {
 function escapeAttribute(value) {
 
     return String(value ?? "")
+
         .replace(
             /\\/g,
             "\\\\"
         )
+
         .replace(
             /'/g,
             "\\'"
@@ -1823,6 +2025,448 @@ function showError(message) {
 
 
 // ==========================================
+// LOGIN SCREEN
+// ==========================================
+
+function createLoginScreen() {
+
+    if (
+        document.getElementById(
+            "adminLoginScreen"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const loginScreen =
+        document.createElement(
+            "div"
+        );
+
+
+    loginScreen.id =
+        "adminLoginScreen";
+
+
+    loginScreen.innerHTML = `
+
+        <div class="admin-login-card">
+
+            <div class="admin-login-logo">
+
+                <div class="admin-login-mark">
+                    M
+                </div>
+
+            </div>
+
+
+            <h1>
+                Maléa by PF
+            </h1>
+
+
+            <p class="admin-login-subtitle">
+                Admin Portal
+            </p>
+
+
+            <form id="adminLoginForm">
+
+                <div class="admin-login-field">
+
+                    <label for="adminEmail">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="adminEmail"
+                        placeholder="Admin email"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="admin-login-field">
+
+                    <label for="adminPassword">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="adminPassword"
+                        placeholder="Password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="admin-login-button"
+                    id="adminLoginButton"
+                >
+                    Sign In
+                </button>
+
+
+                <div
+                    id="adminLoginError"
+                    class="admin-login-error"
+                ></div>
+
+            </form>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        loginScreen
+    );
+
+
+    document
+        .getElementById(
+            "adminLoginForm"
+        )
+        .addEventListener(
+            "submit",
+            handleAdminLogin
+        );
+
+}
+
+
+// ==========================================
+// LOGIN
+// ==========================================
+
+async function handleAdminLogin(event) {
+
+    event.preventDefault();
+
+
+    const email =
+        document
+            .getElementById(
+                "adminEmail"
+            )
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById(
+                "adminPassword"
+            )
+            .value;
+
+
+    const button =
+        document.getElementById(
+            "adminLoginButton"
+        );
+
+
+    const errorBox =
+        document.getElementById(
+            "adminLoginError"
+        );
+
+
+    errorBox.textContent = "";
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "Signing in...";
+
+
+    try {
+
+        await auth.signInWithEmailAndPassword(
+            email,
+            password
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Login error:",
+            error
+        );
+
+
+        let message =
+            "Unable to sign in.";
+
+
+        switch (error.code) {
+
+            case "auth/invalid-credential":
+
+            case "auth/wrong-password":
+
+            case "auth/user-not-found":
+
+                message =
+                    "Incorrect email or password.";
+
+                break;
+
+
+            case "auth/invalid-email":
+
+                message =
+                    "Please enter a valid email address.";
+
+                break;
+
+
+            case "auth/too-many-requests":
+
+                message =
+                    "Too many attempts. Please try again later.";
+
+                break;
+
+
+            default:
+
+                message =
+                    error.message;
+
+        }
+
+
+        errorBox.textContent =
+            message;
+
+
+        button.disabled = false;
+
+        button.textContent =
+            "Sign In";
+
+    }
+
+}
+
+
+// ==========================================
+// HIDE LOGIN
+// ==========================================
+
+function hideLoginScreen() {
+
+    const loginScreen =
+        document.getElementById(
+            "adminLoginScreen"
+        );
+
+
+    if (loginScreen) {
+
+        loginScreen.remove();
+
+    }
+
+
+    document.body.classList.remove(
+        "admin-logged-out"
+    );
+
+}
+
+
+// ==========================================
+// SHOW LOGIN
+// ==========================================
+
+function showLoginScreen() {
+
+    document.body.classList.add(
+        "admin-logged-out"
+    );
+
+
+    createLoginScreen();
+
+}
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+async function logoutAdmin() {
+
+    if (!auth) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await auth.signOut();
+
+
+        console.log(
+            "Admin logged out."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+
+        alert(
+            "Unable to log out. Please try again."
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// CONNECT EXISTING LOGOUT BUTTON
+// ==========================================
+
+function setupLogoutButton() {
+
+    /*
+     * First look for an ID.
+     * If your HTML uses a class instead,
+     * look for .logout-btn.
+     */
+
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        ) ||
+        document.querySelector(
+            ".logout-btn"
+        );
+
+
+    if (!logoutButton) {
+
+        console.warn(
+            "Logout button not found in HTML."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Prevent duplicate event listeners
+     * if this function is called again.
+     */
+
+    if (
+        logoutButton.dataset.logoutReady ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    logoutButton.dataset.logoutReady =
+        "true";
+
+
+    logoutButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            logoutAdmin();
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// AUTH STATE
+// ==========================================
+
+if (auth) {
+
+    auth.onAuthStateChanged(
+        user => {
+
+            if (user) {
+
+                console.log(
+                    "Admin authenticated:",
+                    user.email
+                );
+
+
+                hideLoginScreen();
+
+
+                setupLogoutButton();
+
+
+                showSection(
+                    "dashboard"
+                );
+
+
+                loadDresses();
+
+
+            } else {
+
+                console.log(
+                    "No authenticated admin."
+                );
+
+
+                showLoginScreen();
+
+            }
+
+        }
+    );
+
+} else {
+
+    showLoginScreen();
+
+}
+
+
+// ==========================================
 // GLOBAL FUNCTIONS
 // ==========================================
 
@@ -1835,13 +2479,14 @@ window.removeDress =
 window.closeDressModal =
     closeDressModal;
 
+window.logoutAdmin =
+    logoutAdmin;
+
 
 // ==========================================
-// START
+// INITIAL UI
 // ==========================================
 
 showSection(
     "dashboard"
 );
-
-loadDresses();
