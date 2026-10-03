@@ -11,49 +11,188 @@
 // ==========================================
 
 let auth = null;
+let firebaseApp = null;
 
-try {
+function initializeFirebase() {
 
-    let config = null;
+    try {
 
-    if (
-        typeof window.firebaseConfig !== "undefined"
-    ) {
+        // --------------------------------------
+        // CHECK FIREBASE SDK
+        // --------------------------------------
 
-        config = window.firebaseConfig;
+        if (typeof firebase === "undefined") {
 
-    } else if (
-        typeof firebaseConfig !== "undefined"
-    ) {
+            throw new Error(
+                "Firebase SDK did not load. Check your internet connection or Firebase script URLs."
+            );
 
-        config = firebaseConfig;
+        }
 
-    }
+        if (
+            typeof firebase.initializeApp !== "function"
+        ) {
 
-    if (!config) {
+            throw new Error(
+                "Firebase App SDK is unavailable."
+            );
 
-        throw new Error(
-            "Firebase configuration was not found."
+        }
+
+        if (
+            typeof firebase.auth !== "function"
+        ) {
+
+            throw new Error(
+                "Firebase Authentication SDK did not load. Make sure firebase-auth-compat.js is loading."
+            );
+
+        }
+
+
+        // --------------------------------------
+        // GET CONFIG
+        // --------------------------------------
+
+        const config =
+            window.firebaseConfig;
+
+        if (!config) {
+
+            throw new Error(
+                "Firebase configuration was not found."
+            );
+
+        }
+
+
+        // --------------------------------------
+        // INITIALIZE FIREBASE APP
+        // --------------------------------------
+
+        if (firebase.apps.length > 0) {
+
+            firebaseApp =
+                firebase.app();
+
+        } else {
+
+            firebaseApp =
+                firebase.initializeApp(
+                    config
+                );
+
+        }
+
+
+        // --------------------------------------
+        // INITIALIZE AUTH
+        // --------------------------------------
+
+        auth =
+            firebaseApp.auth();
+
+
+        // --------------------------------------
+        // VERIFY AUTH
+        // --------------------------------------
+
+        if (!auth) {
+
+            throw new Error(
+                "Firebase Authentication could not be initialized."
+            );
+
+        }
+
+        console.log(
+            "Firebase initialized successfully."
         );
 
+        console.log(
+            "Firebase project:",
+            firebaseApp.options.projectId
+        );
+
+        return true;
+
+    } catch (error) {
+
+        console.error(
+            "================================="
+        );
+
+        console.error(
+            "FIREBASE INITIALIZATION ERROR"
+        );
+
+        console.error(
+            error
+        );
+
+        console.error(
+            "================================="
+        );
+
+        auth = null;
+
+        showFirebaseInitializationError(
+            error
+        );
+
+        return false;
+
     }
-
-    if (!firebase.apps.length) {
-
-        firebase.initializeApp(config);
-
-    }
-
-    auth = firebase.auth();
-
-} catch (error) {
-
-    console.error(
-        "Firebase Authentication initialization error:",
-        error
-    );
 
 }
+
+
+// ==========================================
+// FIREBASE INITIALIZATION ERROR
+// ==========================================
+
+function showFirebaseInitializationError(
+    error
+) {
+
+    const message =
+        error && error.message
+            ? error.message
+            : String(error);
+
+
+    console.error(
+        "Firebase error:",
+        message
+    );
+
+
+    // Don't show an ugly alert immediately.
+    // Put the error into the login screen instead.
+    setTimeout(() => {
+
+        const errorBox =
+            document.getElementById(
+                "adminLoginError"
+            );
+
+        if (errorBox) {
+
+            errorBox.textContent =
+                "Firebase could not initialize. " +
+                message;
+
+        }
+
+    }, 100);
+
+}
+
+
+// Initialize Firebase BEFORE anything
+// requiring auth is executed.
+
+initializeFirebase();
 
 
 // ==========================================
@@ -63,13 +202,16 @@ try {
 const PROJECT_ID =
     "malea-by-pf";
 
+
 const API_KEY =
     (
-        auth &&
-        firebase.apps.length
+        firebaseApp &&
+        firebaseApp.options &&
+        firebaseApp.options.apiKey
     )
-        ? firebase.app().options.apiKey
+        ? firebaseApp.options.apiKey
         : "";
+
 
 const FIRESTORE_URL =
     `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/dresses`;
@@ -89,73 +231,119 @@ let selectedPhotoData = "";
 // ==========================================
 
 const inventoryGrid =
-    document.getElementById("inventoryGrid");
+    document.getElementById(
+        "inventoryGrid"
+    );
 
 const emptyState =
-    document.getElementById("emptyState");
+    document.getElementById(
+        "emptyState"
+    );
 
 const searchInput =
-    document.getElementById("searchInput");
+    document.getElementById(
+        "searchInput"
+    );
 
 const categoryFilter =
-    document.getElementById("categoryFilter");
+    document.getElementById(
+        "categoryFilter"
+    );
 
 const availabilityFilter =
-    document.getElementById("availabilityFilter");
+    document.getElementById(
+        "availabilityFilter"
+    );
 
 const dressModal =
-    document.getElementById("dressModal");
+    document.getElementById(
+        "dressModal"
+    );
 
 const dressForm =
-    document.getElementById("dressForm");
+    document.getElementById(
+        "dressForm"
+    );
 
 const dressId =
-    document.getElementById("dressId");
+    document.getElementById(
+        "dressId"
+    );
 
 const dressName =
-    document.getElementById("dressName");
+    document.getElementById(
+        "dressName"
+    );
 
 const dressCategory =
-    document.getElementById("dressCategory");
+    document.getElementById(
+        "dressCategory"
+    );
 
 const dressSize =
-    document.getElementById("dressSize");
+    document.getElementById(
+        "dressSize"
+    );
 
 const dressPrice =
-    document.getElementById("dressPrice");
+    document.getElementById(
+        "dressPrice"
+    );
 
 const dressAvailability =
-    document.getElementById("dressAvailability");
+    document.getElementById(
+        "dressAvailability"
+    );
 
 const dressColor =
-    document.getElementById("dressColor");
+    document.getElementById(
+        "dressColor"
+    );
 
 const dressNotes =
-    document.getElementById("dressNotes");
+    document.getElementById(
+        "dressNotes"
+    );
 
 const dressPhoto =
-    document.getElementById("dressPhoto");
+    document.getElementById(
+        "dressPhoto"
+    );
 
 const photoPreview =
-    document.getElementById("photoPreview");
+    document.getElementById(
+        "photoPreview"
+    );
 
 const pageTitle =
-    document.getElementById("pageTitle");
+    document.getElementById(
+        "pageTitle"
+    );
 
 const pageSubtitle =
-    document.getElementById("pageSubtitle");
+    document.getElementById(
+        "pageSubtitle"
+    );
 
 const sidebar =
-    document.getElementById("sidebar");
+    document.getElementById(
+        "sidebar"
+    );
 
 const mobileMenu =
-    document.getElementById("mobileMenu");
+    document.getElementById(
+        "mobileMenu"
+    );
 
 const navItems =
-    document.querySelectorAll("[data-section]");
+    document.querySelectorAll(
+        "[data-section]"
+    );
 
 const pageSections =
-    document.querySelectorAll(".section");
+    document.querySelectorAll(
+        ".section"
+    );
 
 
 // ==========================================
@@ -221,8 +409,10 @@ async function getFirestoreHeaders() {
 
     }
 
+
     const user =
         auth.currentUser;
+
 
     if (!user) {
 
@@ -232,8 +422,10 @@ async function getFirestoreHeaders() {
 
     }
 
+
     const token =
         await user.getIdToken();
+
 
     return {
 
@@ -261,16 +453,20 @@ function firestoreValue(value) {
 
         return {
 
-            doubleValue: value
+            doubleValue:
+                value
 
         };
 
     }
 
+
     return {
 
         stringValue:
-            String(value ?? "")
+            String(
+                value ?? ""
+            )
 
     };
 
@@ -281,26 +477,34 @@ function firestoreValue(value) {
 // FIRESTORE DOCUMENT
 // ==========================================
 
-function convertFirestoreDocument(document) {
+function convertFirestoreDocument(
+    document
+) {
 
     const fields =
         document.fields || {};
+
 
     return {
 
         id:
             document.name
-                ? document.name.split("/").pop()
+                ? document.name
+                    .split("/")
+                    .pop()
                 : "",
 
         name:
-            fields.name?.stringValue || "",
+            fields.name?.stringValue ||
+            "",
 
         category:
-            fields.category?.stringValue || "",
+            fields.category?.stringValue ||
+            "",
 
         size:
-            fields.size?.stringValue || "",
+            fields.size?.stringValue ||
+            "",
 
         price:
             Number(
@@ -314,19 +518,24 @@ function convertFirestoreDocument(document) {
             "Available",
 
         color:
-            fields.color?.stringValue || "",
+            fields.color?.stringValue ||
+            "",
 
         notes:
-            fields.notes?.stringValue || "",
+            fields.notes?.stringValue ||
+            "",
 
         photo:
-            fields.photo?.stringValue || "",
+            fields.photo?.stringValue ||
+            "",
 
         createdAt:
-            fields.createdAt?.stringValue || "",
+            fields.createdAt?.stringValue ||
+            "",
 
         updatedAt:
-            fields.updatedAt?.stringValue || ""
+            fields.updatedAt?.stringValue ||
+            ""
 
     };
 
@@ -344,17 +553,21 @@ async function loadDresses() {
         const headers =
             await getFirestoreHeaders();
 
+
         const response =
             await fetch(
                 `${FIRESTORE_URL}?key=${API_KEY}`,
                 {
 
-                    method: "GET",
+                    method:
+                        "GET",
 
-                    headers: headers
+                    headers:
+                        headers
 
                 }
             );
+
 
         if (!response.ok) {
 
@@ -364,8 +577,10 @@ async function loadDresses() {
 
         }
 
+
         const data =
             await response.json();
+
 
         dresses =
             (data.documents || [])
@@ -382,11 +597,13 @@ async function loadDresses() {
                         )
                 );
 
+
         renderInventory();
 
         updateDashboardStats();
 
         renderDashboardRecent();
+
 
     } catch (error) {
 
@@ -394,6 +611,7 @@ async function loadDresses() {
             "Firestore load error:",
             error
         );
+
 
         if (
             auth &&
@@ -403,6 +621,7 @@ async function loadDresses() {
             return;
 
         }
+
 
         showError(
             "Unable to load the dress inventory.\n\n" +
@@ -428,10 +647,13 @@ if (dressPhoto) {
 }
 
 
-async function handlePhotoSelection(event) {
+async function handlePhotoSelection(
+    event
+) {
 
     const file =
         event.target.files[0];
+
 
     if (!file) {
 
@@ -443,7 +665,12 @@ async function handlePhotoSelection(event) {
 
     }
 
-    if (!file.type.startsWith("image/")) {
+
+    if (
+        !file.type.startsWith(
+            "image/"
+        )
+    ) {
 
         alert(
             "Please select an image file."
@@ -455,14 +682,19 @@ async function handlePhotoSelection(event) {
 
     }
 
+
     try {
 
         selectedPhotoData =
-            await compressImage(file);
+            await compressImage(
+                file
+            );
+
 
         showPhotoPreview(
             selectedPhotoData
         );
+
 
     } catch (error) {
 
@@ -487,95 +719,124 @@ async function handlePhotoSelection(event) {
 function compressImage(file) {
 
     return new Promise(
-        (resolve, reject) => {
+        (
+            resolve,
+            reject
+        ) => {
 
             const reader =
                 new FileReader();
 
-            reader.onload = event => {
 
-                const image =
-                    new Image();
+            reader.onload =
+                event => {
 
-                image.onload = () => {
+                    const image =
+                        new Image();
 
-                    const maxWidth =
-                        800;
 
-                    const maxHeight =
-                        1000;
+                    image.onload =
+                        () => {
 
-                    let width =
-                        image.width;
+                            const maxWidth =
+                                800;
 
-                    let height =
-                        image.height;
+                            const maxHeight =
+                                1000;
 
-                    const ratio =
-                        Math.min(
-                            maxWidth / width,
-                            maxHeight / height,
-                            1
-                        );
 
-                    width =
-                        Math.round(
-                            width * ratio
-                        );
+                            let width =
+                                image.width;
 
-                    height =
-                        Math.round(
-                            height * ratio
-                        );
+                            let height =
+                                image.height;
 
-                    const canvas =
-                        document.createElement(
-                            "canvas"
-                        );
 
-                    canvas.width =
-                        width;
+                            const ratio =
+                                Math.min(
+                                    maxWidth /
+                                        width,
 
-                    canvas.height =
-                        height;
+                                    maxHeight /
+                                        height,
 
-                    const context =
-                        canvas.getContext(
-                            "2d"
-                        );
+                                    1
+                                );
 
-                    context.drawImage(
-                        image,
-                        0,
-                        0,
-                        width,
-                        height
-                    );
 
-                    const compressed =
-                        canvas.toDataURL(
-                            "image/jpeg",
-                            0.70
-                        );
+                            width =
+                                Math.round(
+                                    width *
+                                    ratio
+                                );
 
-                    resolve(
-                        compressed
-                    );
+
+                            height =
+                                Math.round(
+                                    height *
+                                    ratio
+                                );
+
+
+                            const canvas =
+                                document.createElement(
+                                    "canvas"
+                                );
+
+
+                            canvas.width =
+                                width;
+
+                            canvas.height =
+                                height;
+
+
+                            const context =
+                                canvas.getContext(
+                                    "2d"
+                                );
+
+
+                            context.drawImage(
+                                image,
+                                0,
+                                0,
+                                width,
+                                height
+                            );
+
+
+                            const compressed =
+                                canvas.toDataURL(
+                                    "image/jpeg",
+                                    0.70
+                                );
+
+
+                            resolve(
+                                compressed
+                            );
+
+                        };
+
+
+                    image.onerror =
+                        reject;
+
+
+                    image.src =
+                        event.target.result;
 
                 };
 
-                image.onerror =
-                    reject;
-
-                image.src =
-                    event.target.result;
-
-            };
 
             reader.onerror =
                 reject;
 
-            reader.readAsDataURL(file);
+
+            reader.readAsDataURL(
+                file
+            );
 
         }
     );
@@ -591,6 +852,7 @@ function showPhotoPreview(photo) {
 
     if (!photoPreview) return;
 
+
     if (!photo) {
 
         photoPreview.innerHTML =
@@ -599,6 +861,7 @@ function showPhotoPreview(photo) {
         return;
 
     }
+
 
     photoPreview.innerHTML = `
 
@@ -620,6 +883,7 @@ function renderInventory() {
 
     if (!inventoryGrid) return;
 
+
     const searchTerm =
         searchInput
             ? searchInput.value
@@ -627,56 +891,69 @@ function renderInventory() {
                 .trim()
             : "";
 
+
     const selectedCategory =
         categoryFilter
             ? categoryFilter.value
             : "";
+
 
     const selectedAvailability =
         availabilityFilter
             ? availabilityFilter.value
             : "";
 
+
     const filteredDresses =
-        dresses.filter(dress => {
+        dresses.filter(
+            dress => {
 
-            const searchableText = [
+                const searchableText = [
 
-                dress.name,
-                dress.category,
-                dress.color,
-                dress.size,
-                dress.notes
+                    dress.name,
+                    dress.category,
+                    dress.color,
+                    dress.size,
+                    dress.notes
 
-            ]
-                .join(" ")
-                .toLowerCase();
+                ]
+                    .join(" ")
+                    .toLowerCase();
 
-            return (
 
-                (!searchTerm ||
-                    searchableText.includes(
-                        searchTerm
+                return (
+
+                    (
+                        !searchTerm ||
+                        searchableText.includes(
+                            searchTerm
+                        )
+                    ) &&
+
+                    (
+                        !selectedCategory ||
+                        dress.category ===
+                        selectedCategory
+                    ) &&
+
+                    (
+                        !selectedAvailability ||
+                        dress.availability ===
+                        selectedAvailability
                     )
-                ) &&
 
-                (!selectedCategory ||
-                    dress.category ===
-                    selectedCategory
-                ) &&
+                );
 
-                (!selectedAvailability ||
-                    dress.availability ===
-                    selectedAvailability
-                )
+            }
+        );
 
-            );
-
-        });
 
     inventoryGrid.innerHTML = "";
 
-    if (filteredDresses.length === 0) {
+
+    if (
+        filteredDresses.length === 0
+    ) {
 
         if (emptyState) {
 
@@ -689,6 +966,7 @@ function renderInventory() {
 
     }
 
+
     if (emptyState) {
 
         emptyState.style.display =
@@ -696,204 +974,228 @@ function renderInventory() {
 
     }
 
-    filteredDresses.forEach(dress => {
 
-        const card =
-            document.createElement(
-                "div"
-            );
+    filteredDresses.forEach(
+        dress => {
 
-        card.className =
-            "dress-card";
+            const card =
+                document.createElement(
+                    "div"
+                );
 
-        const availability =
-            dress.availability ||
-            "Available";
 
-        const photoHTML =
-            dress.photo
+            card.className =
+                "dress-card";
 
-                ? `
 
-                    <img
-                        class="dress-photo-image"
-                        src="${escapeAttribute(
-                            dress.photo
-                        )}"
-                        alt="${escapeHTML(
-                            dress.name ||
-                            "Dress"
-                        )}"
-                    >
+            const availability =
+                dress.availability ||
+                "Available";
 
-                `
 
-                : `
+            const photoHTML =
+                dress.photo
 
-                    <div class="dress-photo-placeholder">
-
-                        <span>✦</span>
-
-                        <small>
-                            Maléa by PF
-                        </small>
-
-                    </div>
-
-                `;
-
-        card.innerHTML = `
-
-            <div class="dress-photo">
-
-                ${photoHTML}
-
-                <span class="status ${getAvailabilityClass(availability)}">
-
-                    ${escapeHTML(
-                        availability
-                    )}
-
-                </span>
-
-            </div>
-
-            <div class="dress-body">
-
-                <div class="dress-top">
-
-                    <div>
-
-                        <div class="dress-name">
-
-                            ${escapeHTML(
-                                dress.name ||
-                                "Unnamed Dress"
-                            )}
-
-                        </div>
-
-                        <div class="dress-category">
-
-                            ${escapeHTML(
-                                dress.category ||
-                                "Uncategorized"
-                            )}
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="dress-meta">
-
-                    <div>
-
-                        <span>
-                            Size
-                        </span>
-
-                        <strong>
-
-                            ${escapeHTML(
-                                dress.size ||
-                                "-"
-                            )}
-
-                        </strong>
-
-                    </div>
-
-                    <div>
-
-                        <span>
-                            Color
-                        </span>
-
-                        <strong>
-
-                            ${escapeHTML(
-                                dress.color ||
-                                "-"
-                            )}
-
-                        </strong>
-
-                    </div>
-
-                </div>
-
-                ${
-                    dress.notes
                     ? `
 
-                        <div class="dress-notes">
+                        <img
+                            class="dress-photo-image"
+                            src="${escapeAttribute(
+                                dress.photo
+                            )}"
+                            alt="${escapeHTML(
+                                dress.name ||
+                                "Dress"
+                            )}"
+                        >
 
-                            ${escapeHTML(
-                                dress.notes
-                            )}
+                    `
+
+                    : `
+
+                        <div class="dress-photo-placeholder">
+
+                            <span>✦</span>
+
+                            <small>
+                                Maléa by PF
+                            </small>
 
                         </div>
 
-                    `
-                    : ""
-                }
+                    `;
 
-                <div class="dress-price">
 
-                    <span>
-                        Rental Price
-                    </span>
+            card.innerHTML = `
 
-                    <strong>
+                <div class="dress-photo">
 
-                        ₱${Number(
-                            dress.price || 0
-                        ).toLocaleString(
-                            "en-PH",
-                            {
-                                minimumFractionDigits:
-                                    2,
+                    ${photoHTML}
 
-                                maximumFractionDigits:
-                                    2
-                            }
+                    <span
+                        class="status ${getAvailabilityClass(
+                            availability
+                        )}"
+                    >
+
+                        ${escapeHTML(
+                            availability
                         )}
 
-                    </strong>
+                    </span>
 
                 </div>
 
-                <div class="dress-actions">
 
-                    <button
-                        type="button"
-                        class="small-btn"
-                        onclick="editDress('${escapeAttribute(dress.id)}')"
-                    >
-                        Edit
-                    </button>
+                <div class="dress-body">
 
-                    <button
-                        type="button"
-                        class="small-btn delete"
-                        onclick="removeDress('${escapeAttribute(dress.id)}')"
-                    >
-                        Delete
-                    </button>
+                    <div class="dress-top">
+
+                        <div>
+
+                            <div class="dress-name">
+
+                                ${escapeHTML(
+                                    dress.name ||
+                                    "Unnamed Dress"
+                                )}
+
+                            </div>
+
+
+                            <div class="dress-category">
+
+                                ${escapeHTML(
+                                    dress.category ||
+                                    "Uncategorized"
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="dress-meta">
+
+                        <div>
+
+                            <span>
+                                Size
+                            </span>
+
+                            <strong>
+
+                                ${escapeHTML(
+                                    dress.size ||
+                                    "-"
+                                )}
+
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Color
+                            </span>
+
+                            <strong>
+
+                                ${escapeHTML(
+                                    dress.color ||
+                                    "-"
+                                )}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    ${
+                        dress.notes
+                            ? `
+
+                                <div class="dress-notes">
+
+                                    ${escapeHTML(
+                                        dress.notes
+                                    )}
+
+                                </div>
+
+                            `
+                            : ""
+                    }
+
+
+                    <div class="dress-price">
+
+                        <span>
+                            Rental Price
+                        </span>
+
+                        <strong>
+
+                            ₱${Number(
+                                dress.price || 0
+                            ).toLocaleString(
+                                "en-PH",
+                                {
+                                    minimumFractionDigits:
+                                        2,
+
+                                    maximumFractionDigits:
+                                        2
+                                }
+                            )}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="dress-actions">
+
+                        <button
+                            type="button"
+                            class="small-btn"
+                            onclick="editDress('${escapeAttribute(
+                                dress.id
+                            )}')"
+                        >
+                            Edit
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="small-btn delete"
+                            onclick="removeDress('${escapeAttribute(
+                                dress.id
+                            )}')"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
 
                 </div>
 
-            </div>
+            `;
 
-        `;
 
-        inventoryGrid.appendChild(
-            card
-        );
+            inventoryGrid.appendChild(
+                card
+            );
 
-    });
+        }
+    );
 
 }
 
@@ -903,20 +1205,25 @@ function renderInventory() {
 // ==========================================
 
 document
-    .querySelectorAll("[data-open-add]")
-    .forEach(button => {
+    .querySelectorAll(
+        "[data-open-add]"
+    )
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            openAddDressModal
-        );
+            button.addEventListener(
+                "click",
+                openAddDressModal
+            );
 
-    });
+        }
+    );
 
 
 function openAddDressModal() {
 
     if (!dressModal) return;
+
 
     if (dressForm) {
 
@@ -924,20 +1231,24 @@ function openAddDressModal() {
 
     }
 
+
     if (dressId) {
 
         dressId.value = "";
 
     }
 
+
     selectedPhotoData = "";
 
     showPhotoPreview("");
+
 
     const modalTitle =
         document.getElementById(
             "modalTitle"
         );
+
 
     if (modalTitle) {
 
@@ -945,6 +1256,7 @@ function openAddDressModal() {
             "Add Dress";
 
     }
+
 
     dressModal.classList.add(
         "active"
@@ -958,24 +1270,30 @@ function openAddDressModal() {
 // ==========================================
 
 document
-    .querySelectorAll("[data-close-modal]")
-    .forEach(button => {
+    .querySelectorAll(
+        "[data-close-modal]"
+    )
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            closeDressModal
-        );
+            button.addEventListener(
+                "click",
+                closeDressModal
+            );
 
-    });
+        }
+    );
 
 
 function closeDressModal() {
 
     if (!dressModal) return;
 
+
     dressModal.classList.remove(
         "active"
     );
+
 
     if (dressForm) {
 
@@ -983,11 +1301,13 @@ function closeDressModal() {
 
     }
 
+
     if (dressId) {
 
         dressId.value = "";
 
     }
+
 
     selectedPhotoData = "";
 
@@ -1014,8 +1334,21 @@ async function saveDress(event) {
 
     event.preventDefault();
 
+
+    if (!auth) {
+
+        showError(
+            "Firebase Authentication is not available."
+        );
+
+        return;
+
+    }
+
+
     const name =
         dressName.value.trim();
+
 
     if (!name) {
 
@@ -1027,8 +1360,10 @@ async function saveDress(event) {
 
     }
 
+
     const category =
         dressCategory.value;
+
 
     if (!category) {
 
@@ -1040,25 +1375,32 @@ async function saveDress(event) {
 
     }
 
+
     const size =
         dressSize.value.trim();
+
 
     const price =
         Number(
             dressPrice.value
         ) || 0;
 
+
     const availability =
         dressAvailability.value;
+
 
     const color =
         dressColor.value.trim();
 
+
     const notes =
         dressNotes.value.trim();
 
+
     const now =
         new Date().toISOString();
+
 
     const fields = {
 
@@ -1075,7 +1417,9 @@ async function saveDress(event) {
             firestoreValue(price),
 
         availability:
-            firestoreValue(availability),
+            firestoreValue(
+                availability
+            ),
 
         color:
             firestoreValue(color),
@@ -1092,6 +1436,7 @@ async function saveDress(event) {
             firestoreValue(now)
 
     };
+
 
     try {
 
@@ -1113,6 +1458,7 @@ async function saveDress(event) {
                             dressId.value
                     );
 
+
                 if (
                     existingDress &&
                     existingDress.photo
@@ -1127,27 +1473,33 @@ async function saveDress(event) {
 
             }
 
+
             const documentURL =
-                `${FIRESTORE_URL}/${encodeURIComponent(dressId.value)}` +
-                `?key=${API_KEY}`;
+                `${FIRESTORE_URL}/${encodeURIComponent(
+                    dressId.value
+                )}?key=${API_KEY}`;
+
 
             const response =
                 await fetch(
                     documentURL,
                     {
 
-                        method: "PATCH",
+                        method:
+                            "PATCH",
 
                         headers:
                             await getFirestoreHeaders(),
 
                         body:
                             JSON.stringify({
-                                fields: fields
+                                fields:
+                                    fields
                             })
 
                     }
                 );
+
 
             if (!response.ok) {
 
@@ -1156,6 +1508,7 @@ async function saveDress(event) {
                 );
 
             }
+
 
             alert(
                 "Dress updated successfully."
@@ -1172,23 +1525,27 @@ async function saveDress(event) {
             fields.createdAt =
                 firestoreValue(now);
 
+
             const response =
                 await fetch(
                     `${FIRESTORE_URL}?key=${API_KEY}`,
                     {
 
-                        method: "POST",
+                        method:
+                            "POST",
 
                         headers:
                             await getFirestoreHeaders(),
 
                         body:
                             JSON.stringify({
-                                fields: fields
+                                fields:
+                                    fields
                             })
 
                     }
                 );
+
 
             if (!response.ok) {
 
@@ -1198,15 +1555,18 @@ async function saveDress(event) {
 
             }
 
+
             alert(
                 "Dress added successfully."
             );
 
         }
 
+
         closeDressModal();
 
         await loadDresses();
+
 
     } catch (error) {
 
@@ -1214,6 +1574,7 @@ async function saveDress(event) {
             "Save error:",
             error
         );
+
 
         showError(
             "Unable to save the dress.\n\n" +
@@ -1237,6 +1598,7 @@ function editDress(id) {
                 item.id === id
         );
 
+
     if (!dress) {
 
         alert(
@@ -1246,6 +1608,7 @@ function editDress(id) {
         return;
 
     }
+
 
     dressId.value =
         dress.id;
@@ -1271,17 +1634,21 @@ function editDress(id) {
     dressNotes.value =
         dress.notes;
 
+
     selectedPhotoData =
         dress.photo || "";
+
 
     showPhotoPreview(
         dress.photo || ""
     );
 
+
     const modalTitle =
         document.getElementById(
             "modalTitle"
         );
+
 
     if (modalTitle) {
 
@@ -1289,6 +1656,7 @@ function editDress(id) {
             "Edit Dress";
 
     }
+
 
     dressModal.classList.add(
         "active"
@@ -1309,10 +1677,12 @@ async function removeDress(id) {
                 item.id === id
         );
 
+
     const name =
         dress
             ? dress.name
             : "this dress";
+
 
     if (
         !confirm(
@@ -1325,24 +1695,29 @@ async function removeDress(id) {
 
     }
 
+
     try {
 
         const documentURL =
-            `${FIRESTORE_URL}/${encodeURIComponent(id)}` +
-            `?key=${API_KEY}`;
+            `${FIRESTORE_URL}/${encodeURIComponent(
+                id
+            )}?key=${API_KEY}`;
+
 
         const response =
             await fetch(
                 documentURL,
                 {
 
-                    method: "DELETE",
+                    method:
+                        "DELETE",
 
                     headers:
                         await getFirestoreHeaders()
 
                 }
             );
+
 
         if (!response.ok) {
 
@@ -1352,11 +1727,14 @@ async function removeDress(id) {
 
         }
 
+
         alert(
             "Dress deleted successfully."
         );
 
+
         await loadDresses();
+
 
     } catch (error) {
 
@@ -1364,6 +1742,7 @@ async function removeDress(id) {
             "Delete error:",
             error
         );
+
 
         showError(
             "Unable to delete the dress.\n\n" +
@@ -1402,6 +1781,7 @@ if (categoryFilter) {
 
 }
 
+
 if (availabilityFilter) {
 
     availabilityFilter.addEventListener(
@@ -1421,12 +1801,14 @@ function updateDashboardStats() {
     const total =
         dresses.length;
 
+
     const available =
         dresses.filter(
             dress =>
                 dress.availability ===
                 "Available"
         ).length;
+
 
     const reserved =
         dresses.filter(
@@ -1435,6 +1817,7 @@ function updateDashboardStats() {
                 "Reserved"
         ).length;
 
+
     const rented =
         dresses.filter(
             dress =>
@@ -1442,25 +1825,30 @@ function updateDashboardStats() {
                 "Rented"
         ).length;
 
+
     const statTotal =
         document.getElementById(
             "statTotal"
         );
+
 
     const statAvailable =
         document.getElementById(
             "statAvailable"
         );
 
+
     const statReserved =
         document.getElementById(
             "statReserved"
         );
 
+
     const statRented =
         document.getElementById(
             "statRented"
         );
+
 
     if (statTotal) {
 
@@ -1469,6 +1857,7 @@ function updateDashboardStats() {
 
     }
 
+
     if (statAvailable) {
 
         statAvailable.textContent =
@@ -1476,12 +1865,14 @@ function updateDashboardStats() {
 
     }
 
+
     if (statReserved) {
 
         statReserved.textContent =
             reserved;
 
     }
+
 
     if (statRented) {
 
@@ -1504,9 +1895,12 @@ function renderDashboardRecent() {
             "dashboardRecent"
         );
 
+
     if (!container) return;
 
+
     container.innerHTML = "";
+
 
     if (dresses.length === 0) {
 
@@ -1526,55 +1920,67 @@ function renderDashboardRecent() {
 
     }
 
+
     dresses
         .slice(0, 5)
-        .forEach(dress => {
+        .forEach(
+            dress => {
 
-            const row =
-                document.createElement(
-                    "div"
-                );
+                const row =
+                    document.createElement(
+                        "div"
+                    );
 
-            row.className =
-                "recent-row";
 
-            row.innerHTML = `
+                row.className =
+                    "recent-row";
 
-                <div>
 
-                    <strong>
+                row.innerHTML = `
 
-                        ${escapeHTML(
-                            dress.name
-                        )}
+                    <div>
 
-                    </strong>
+                        <strong>
 
-                    <div class="recent-category">
+                            ${escapeHTML(
+                                dress.name
+                            )}
 
-                        ${escapeHTML(
-                            dress.category
-                        )}
+                        </strong>
+
+
+                        <div class="recent-category">
+
+                            ${escapeHTML(
+                                dress.category
+                            )}
+
+                        </div>
 
                     </div>
 
-                </div>
 
-                <span class="status ${getAvailabilityClass(dress.availability)}">
+                    <span
+                        class="status ${getAvailabilityClass(
+                            dress.availability
+                        )}"
+                    >
 
-                    ${escapeHTML(
-                        dress.availability
-                    )}
+                        ${escapeHTML(
+                            dress.availability
+                        )}
 
-                </span>
+                    </span>
 
-            `;
+                `;
 
-            container.appendChild(
-                row
-            );
 
-        });
+                container.appendChild(
+                    row
+                );
+
+            }
+        );
 
 }
 
@@ -1583,20 +1989,27 @@ function renderDashboardRecent() {
 // NAVIGATION
 // ==========================================
 
-function showSection(sectionName) {
+function showSection(
+    sectionName
+) {
 
-    pageSections.forEach(section => {
+    pageSections.forEach(
+        section => {
 
-        section.classList.remove(
-            "active-section"
-        );
+            section.classList.remove(
+                "active-section"
+            );
 
-    });
+        }
+    );
+
 
     const selected =
         document.getElementById(
-            sectionName + "Section"
+            sectionName +
+            "Section"
         );
+
 
     if (selected) {
 
@@ -1606,18 +2019,23 @@ function showSection(sectionName) {
 
     }
 
-    navItems.forEach(item => {
 
-        item.classList.remove(
-            "active"
-        );
+    navItems.forEach(
+        item => {
 
-    });
+            item.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
 
     const activeButton =
         document.querySelector(
             `[data-section="${sectionName}"]`
         );
+
 
     if (activeButton) {
 
@@ -1627,23 +2045,30 @@ function showSection(sectionName) {
 
     }
 
+
     if (pageTitles[sectionName]) {
 
         if (pageTitle) {
 
             pageTitle.textContent =
-                pageTitles[sectionName][0];
+                pageTitles[
+                    sectionName
+                ][0];
 
         }
+
 
         if (pageSubtitle) {
 
             pageSubtitle.textContent =
-                pageTitles[sectionName][1];
+                pageTitles[
+                    sectionName
+                ][1];
 
         }
 
     }
+
 
     if (sidebar) {
 
@@ -1660,25 +2085,28 @@ function showSection(sectionName) {
 // SIDEBAR BUTTONS
 // ==========================================
 
-navItems.forEach(button => {
+navItems.forEach(
+    button => {
 
-    button.addEventListener(
-        "click",
-        () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            const sectionName =
-                button.getAttribute(
-                    "data-section"
+                const sectionName =
+                    button.getAttribute(
+                        "data-section"
+                    );
+
+
+                showSection(
+                    sectionName
                 );
 
-            showSection(
-                sectionName
-            );
+            }
+        );
 
-        }
-    );
-
-});
+    }
+);
 
 
 // ==========================================
@@ -1686,24 +2114,27 @@ navItems.forEach(button => {
 // ==========================================
 
 document
-    .querySelectorAll("[data-go]")
-    .forEach(button => {
+    .querySelectorAll(
+        "[data-go]"
+    )
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                showSection(
-                    button.getAttribute(
-                        "data-go"
-                    )
-                );
+                    showSection(
+                        button.getAttribute(
+                            "data-go"
+                        )
+                    );
 
-            }
+                }
+            );
 
-        );
-
-    });
+        }
+    );
 
 
 // ==========================================
@@ -1717,6 +2148,7 @@ if (mobileMenu) {
         event => {
 
             event.stopPropagation();
+
 
             if (sidebar) {
 
@@ -1742,22 +2174,38 @@ document.addEventListener(
 
         if (!sidebar) return;
 
+
         if (
             window.innerWidth > 1100
-        ) return;
+        ) {
+
+            return;
+
+        }
+
 
         if (
             sidebar.contains(
                 event.target
             )
-        ) return;
+        ) {
+
+            return;
+
+        }
+
 
         if (
             mobileMenu &&
             mobileMenu.contains(
                 event.target
             )
-        ) return;
+        ) {
+
+            return;
+
+        }
+
 
         sidebar.classList.remove(
             "open"
@@ -1776,10 +2224,12 @@ document.addEventListener(
     event => {
 
         if (
-            event.key === "Escape"
+            event.key ===
+            "Escape"
         ) {
 
             closeDressModal();
+
 
             if (sidebar) {
 
@@ -1799,7 +2249,9 @@ document.addEventListener(
 // HELPERS
 // ==========================================
 
-function getAvailabilityClass(status) {
+function getAvailabilityClass(
+    status
+) {
 
     switch (status) {
 
@@ -1825,7 +2277,9 @@ function getAvailabilityClass(status) {
 
 function escapeHTML(value) {
 
-    return String(value ?? "")
+    return String(
+        value ?? ""
+    )
 
         .replace(
             /&/g,
@@ -1857,7 +2311,9 @@ function escapeHTML(value) {
 
 function escapeAttribute(value) {
 
-    return String(value ?? "")
+    return String(
+        value ?? ""
+    )
 
         .replace(
             /\\/g,
@@ -1874,9 +2330,13 @@ function escapeAttribute(value) {
 
 function showError(message) {
 
-    console.error(message);
+    console.error(
+        message
+    );
 
-    alert(message);
+    alert(
+        message
+    );
 
 }
 
@@ -1897,13 +2357,16 @@ function createLoginScreen() {
 
     }
 
+
     const loginScreen =
         document.createElement(
             "div"
         );
 
+
     loginScreen.id =
         "adminLoginScreen";
+
 
     loginScreen.innerHTML = `
 
@@ -1917,13 +2380,16 @@ function createLoginScreen() {
 
             </div>
 
+
             <h1>
                 Maléa by PF
             </h1>
 
+
             <p class="admin-login-subtitle">
                 Admin Portal
             </p>
+
 
             <form id="adminLoginForm">
 
@@ -1932,6 +2398,7 @@ function createLoginScreen() {
                     <label for="adminEmail">
                         Email
                     </label>
+
 
                     <input
                         type="email"
@@ -1943,11 +2410,13 @@ function createLoginScreen() {
 
                 </div>
 
+
                 <div class="admin-login-field">
 
                     <label for="adminPassword">
                         Password
                     </label>
+
 
                     <input
                         type="password"
@@ -1959,6 +2428,7 @@ function createLoginScreen() {
 
                 </div>
 
+
                 <button
                     type="submit"
                     class="admin-login-button"
@@ -1966,6 +2436,7 @@ function createLoginScreen() {
                 >
                     Sign In
                 </button>
+
 
                 <div
                     id="adminLoginError"
@@ -1978,18 +2449,26 @@ function createLoginScreen() {
 
     `;
 
+
     document.body.appendChild(
         loginScreen
     );
 
-    document
-        .getElementById(
+
+    const loginForm =
+        document.getElementById(
             "adminLoginForm"
-        )
-        .addEventListener(
+        );
+
+
+    if (loginForm) {
+
+        loginForm.addEventListener(
             "submit",
             handleAdminLogin
         );
+
+    }
 
 }
 
@@ -1998,41 +2477,88 @@ function createLoginScreen() {
 // LOGIN
 // ==========================================
 
-async function handleAdminLogin(event) {
+async function handleAdminLogin(
+    event
+) {
 
     event.preventDefault();
 
-    const email =
-        document
-            .getElementById(
-                "adminEmail"
-            )
-            .value
-            .trim();
-
-    const password =
-        document
-            .getElementById(
-                "adminPassword"
-            )
-            .value;
-
-    const button =
-        document.getElementById(
-            "adminLoginButton"
-        );
 
     const errorBox =
         document.getElementById(
             "adminLoginError"
         );
 
-    errorBox.textContent = "";
 
-    button.disabled = true;
+    const button =
+        document.getElementById(
+            "adminLoginButton"
+        );
 
-    button.textContent =
-        "Signing in...";
+
+    if (!auth) {
+
+        if (errorBox) {
+
+            errorBox.textContent =
+                "Firebase Authentication is not available. " +
+                "Please refresh the page.";
+
+        }
+
+        return;
+
+    }
+
+
+    const emailInput =
+        document.getElementById(
+            "adminEmail"
+        );
+
+
+    const passwordInput =
+        document.getElementById(
+            "adminPassword"
+        );
+
+
+    if (
+        !emailInput ||
+        !passwordInput
+    ) {
+
+        return;
+
+    }
+
+
+    const email =
+        emailInput.value.trim();
+
+
+    const password =
+        passwordInput.value;
+
+
+    if (errorBox) {
+
+        errorBox.textContent =
+            "";
+
+    }
+
+
+    if (button) {
+
+        button.disabled =
+            true;
+
+        button.textContent =
+            "Signing in...";
+
+    }
+
 
     try {
 
@@ -2041,6 +2567,7 @@ async function handleAdminLogin(event) {
             password
         );
 
+
     } catch (error) {
 
         console.error(
@@ -2048,8 +2575,10 @@ async function handleAdminLogin(event) {
             error
         );
 
+
         let message =
             "Unable to sign in.";
+
 
         switch (error.code) {
 
@@ -2064,12 +2593,14 @@ async function handleAdminLogin(event) {
 
                 break;
 
+
             case "auth/invalid-email":
 
                 message =
                     "Please enter a valid email address.";
 
                 break;
+
 
             case "auth/too-many-requests":
 
@@ -2078,20 +2609,49 @@ async function handleAdminLogin(event) {
 
                 break;
 
+
+            case "auth/operation-not-allowed":
+
+                message =
+                    "Email/password sign-in is not enabled in Firebase Authentication.";
+
+                break;
+
+
+            case "auth/unauthorized-domain":
+
+                message =
+                    "This website domain is not authorized in Firebase Authentication.";
+
+                break;
+
+
             default:
 
                 message =
-                    error.message;
+                    error.message ||
+                    "Unable to sign in.";
 
         }
 
-        errorBox.textContent =
-            message;
 
-        button.disabled = false;
+        if (errorBox) {
 
-        button.textContent =
-            "Sign In";
+            errorBox.textContent =
+                message;
+
+        }
+
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "Sign In";
+
+        }
 
     }
 
@@ -2109,11 +2669,13 @@ function hideLoginScreen() {
             "adminLoginScreen"
         );
 
+
     if (loginScreen) {
 
         loginScreen.remove();
 
     }
+
 
     document.body.classList.remove(
         "admin-logged-out"
@@ -2132,6 +2694,7 @@ function showLoginScreen() {
         "admin-logged-out"
     );
 
+
     createLoginScreen();
 
 }
@@ -2141,7 +2704,9 @@ function showLoginScreen() {
 // LOGOUT
 // ==========================================
 
-async function logoutAdmin(event) {
+async function logoutAdmin(
+    event
+) {
 
     if (event) {
 
@@ -2151,23 +2716,31 @@ async function logoutAdmin(event) {
 
     }
 
+
     if (!auth) {
 
         console.error(
             "Firebase Authentication is not initialized."
         );
 
+        alert(
+            "Firebase Authentication is not available."
+        );
+
         return;
 
     }
+
 
     try {
 
         await auth.signOut();
 
+
         console.log(
             "Admin logged out successfully."
         );
+
 
     } catch (error) {
 
@@ -2175,6 +2748,7 @@ async function logoutAdmin(event) {
             "Logout error:",
             error
         );
+
 
         alert(
             "Unable to log out. Please try again."
@@ -2202,6 +2776,7 @@ function setupLogoutButton() {
             "[data-logout]"
         );
 
+
     if (!logoutButton) {
 
         console.warn(
@@ -2212,6 +2787,7 @@ function setupLogoutButton() {
 
     }
 
+
     if (
         logoutButton.dataset.logoutReady ===
         "true"
@@ -2221,8 +2797,10 @@ function setupLogoutButton() {
 
     }
 
+
     logoutButton.dataset.logoutReady =
         "true";
+
 
     logoutButton.addEventListener(
         "click",
@@ -2236,7 +2814,20 @@ function setupLogoutButton() {
 // AUTH STATE
 // ==========================================
 
-if (auth) {
+function startAuthentication() {
+
+    if (!auth) {
+
+        console.error(
+            "Authentication cannot start because auth is null."
+        );
+
+        showLoginScreen();
+
+        return;
+
+    }
+
 
     auth.onAuthStateChanged(
         user => {
@@ -2248,15 +2839,20 @@ if (auth) {
                     user.email
                 );
 
+
                 hideLoginScreen();
 
+
                 setupLogoutButton();
+
 
                 showSection(
                     "dashboard"
                 );
 
+
                 loadDresses();
+
 
             } else {
 
@@ -2264,7 +2860,9 @@ if (auth) {
                     "No authenticated admin."
                 );
 
+
                 dresses = [];
+
 
                 renderInventory();
 
@@ -2272,16 +2870,24 @@ if (auth) {
 
                 renderDashboardRecent();
 
+
                 showLoginScreen();
 
             }
 
+        },
+        error => {
+
+            console.error(
+                "Firebase Auth state error:",
+                error
+            );
+
+
+            showLoginScreen();
+
         }
     );
-
-} else {
-
-    showLoginScreen();
 
 }
 
@@ -2293,11 +2899,14 @@ if (auth) {
 window.editDress =
     editDress;
 
+
 window.removeDress =
     removeDress;
 
+
 window.closeDressModal =
     closeDressModal;
+
 
 window.logoutAdmin =
     logoutAdmin;
@@ -2310,3 +2919,10 @@ window.logoutAdmin =
 showSection(
     "dashboard"
 );
+
+
+// ==========================================
+// START AUTHENTICATION
+// ==========================================
+
+startAuthentication();
