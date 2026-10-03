@@ -1,4 +1,9 @@
-export const firebaseConfig = {
+// ==========================================
+// MALÉA BY PF
+// FIREBASE CONFIGURATION
+// ==========================================
+
+window.firebaseConfig = {
     apiKey: "AIzaSyCo6oYU8RpConNDMzBUs8CQyIfG2gm0kic",
     authDomain: "malea-by-pf.firebaseapp.com",
     projectId: "malea-by-pf",
