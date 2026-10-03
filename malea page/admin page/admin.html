@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <title>Maléa by PF — Admin</title>
 
@@ -15,622 +13,421 @@
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
 
-    <!-- Firebase Configuration -->
+    <!-- Firebase configuration -->
     <script src="firebase/firebase-config.js"></script>
 
-    <!-- Admin Application -->
+    <!-- Admin application -->
     <script src="js/admin.js"></script>
 </head>
 
 <body>
 
-<div id="adminApp" class="admin-app">
+<div class="app-shell">
 
-    <!-- =========================
+    <!-- =====================================================
          SIDEBAR
-    ========================== -->
+    ====================================================== -->
+
     <aside class="sidebar" id="sidebar">
 
-        <div class="sidebar-brand">
-
-            <div class="brand-mark">
-                M
-            </div>
-
-            <div>
-                <div class="brand-name">Maléa</div>
-                <div class="brand-subtitle">by PF</div>
-            </div>
-
+        <div class="brand">
+            <div class="brand-name">MALÉA</div>
+            <div class="brand-subtitle">BY PF</div>
         </div>
-
 
         <nav class="sidebar-nav">
 
-            <button
-                class="nav-item active"
-                data-section="dashboardSection"
-                type="button"
-            >
-                <span>⌂</span>
+            <button class="nav-item active"
+                    type="button"
+                    data-section="dashboard">
+                <span class="nav-icon">▦</span>
                 <span>Dashboard</span>
             </button>
 
-
-            <button
-                class="nav-item"
-                data-section="inventorySection"
-                type="button"
-            >
-                <span>◈</span>
-                <span>Dress Inventory</span>
+            <button class="nav-item"
+                    type="button"
+                    data-section="inventory">
+                <span class="nav-icon">♟</span>
+                <span>Dresses</span>
             </button>
 
-
-            <button
-                class="nav-item"
-                data-section="reservationsSection"
-                type="button"
-            >
-                <span>▣</span>
+            <button class="nav-item"
+                    type="button"
+                    data-section="reservations">
+                <span class="nav-icon">▣</span>
                 <span>Reservations</span>
             </button>
 
-
-            <button
-                class="nav-item"
-                data-section="customersSection"
-                type="button"
-            >
-                <span>♙</span>
+            <button class="nav-item"
+                    type="button"
+                    data-section="customers">
+                <span class="nav-icon">♟</span>
                 <span>Customers</span>
             </button>
 
-
-            <button
-                class="nav-item"
-                data-section="calendarSection"
-                type="button"
-            >
-                <span>◷</span>
+            <button class="nav-item"
+                    type="button"
+                    data-section="calendar">
+                <span class="nav-icon">▦</span>
                 <span>Rental Calendar</span>
             </button>
 
-
-            <button
-                class="nav-item"
-                data-section="paymentsSection"
-                type="button"
-            >
-                <span>₱</span>
+            <button class="nav-item"
+                    type="button"
+                    data-section="payments">
+                <span class="nav-icon">₱</span>
                 <span>Payments</span>
             </button>
 
-
-            <button
-                class="nav-item"
-                data-section="reportsSection"
-                type="button"
-            >
-                <span>▤</span>
+            <button class="nav-item"
+                    type="button"
+                    data-section="reports">
+                <span class="nav-icon">▥</span>
                 <span>Reports</span>
             </button>
 
-
-            <button
-                class="nav-item"
-                data-section="settingsSection"
-                type="button"
-            >
-                <span>⚙</span>
+            <button class="nav-item"
+                    type="button"
+                    data-section="settings">
+                <span class="nav-icon">⚙</span>
                 <span>Settings</span>
             </button>
 
         </nav>
 
+        <div class="sidebar-bottom">
 
-        <div class="sidebar-footer">
-            <div class="sidebar-footer-text">
-                Maléa by PF
-            </div>
+            <button type="button"
+                    class="logout-btn"
+                    id="logoutButton">
+                <span>↪</span>
+                Logout
+            </button>
 
-            <div class="sidebar-footer-small">
-                Admin Panel
-            </div>
         </div>
 
     </aside>
 
 
-    <!-- =========================
-         MAIN CONTENT
-    ========================== -->
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
     <main class="main-content">
 
         <!-- TOPBAR -->
+
         <header class="topbar">
 
-            <button
-                type="button"
-                class="mobile-menu-btn"
-                id="mobileMenuButton"
-            >
+            <button type="button"
+                    class="mobile-menu-btn"
+                    id="mobileMenuButton">
                 ☰
             </button>
 
-
-            <div class="page-heading">
-
-                <h1 id="pageTitle">
-                    Dashboard
-                </h1>
-
+            <!--<div>
+                <h1 id="pageTitle">Dashboard</h1>
                 <p id="pageSubtitle">
-                    Overview of your dress rental inventory
+                    Overview of your dress rental business
                 </p>
-
-            </div>
-
-
-            <div class="topbar-right">
-
-                <span class="admin-status">
-                    Admin
-                </span>
-
-                <button
-                    type="button"
-                    class="logout-btn"
-                    id="logoutButton"
-                >
-                    Logout
-                </button>
-
-            </div>
+            </div>-->
 
         </header>
 
 
-        <!-- =========================
-             PAGE CONTENT
-        ========================== -->
-        <div class="content-area">
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
 
+        <section class="section active-section"
+                 id="dashboard">
 
-            <!-- =========================
-                 DASHBOARD
-            ========================== -->
-            <section
-                id="dashboardSection"
-                class="section active-section"
-            >
+            <div class="stats-grid">
 
-                <div class="section-header">
-
-                    <div>
-                        <h2>Dashboard</h2>
-
-                        <p>
-                            Current inventory availability
-                        </p>
-                    </div>
-
-                    <button
-                        type="button"
-                        class="primary-btn"
-                        id="dashboardAddDressButton"
-                    >
-                        + Add Dress
-                    </button>
-
+                <div class="stat-card">
+                    <div class="stat-label">Total Dresses</div>
+                    <div class="stat-number" id="statTotal">0</div>
                 </div>
 
-
-                <!-- STAT CARDS -->
-                <div class="stats-grid">
-
-                    <div class="stat-card">
-
-                        <div class="stat-icon total">
-                            ◈
-                        </div>
-
-                        <div>
-                            <div class="stat-label">
-                                Total Dresses
-                            </div>
-
-                            <div
-                                class="stat-value"
-                                id="statTotal"
-                            >
-                                0
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-icon available">
-                            ✓
-                        </div>
-
-                        <div>
-                            <div class="stat-label">
-                                Available
-                            </div>
-
-                            <div
-                                class="stat-value"
-                                id="statAvailable"
-                            >
-                                0
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-icon reserved">
-                            ◷
-                        </div>
-
-                        <div>
-                            <div class="stat-label">
-                                Reserved
-                            </div>
-
-                            <div
-                                class="stat-value"
-                                id="statReserved"
-                            >
-                                0
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-icon borrowed">
-                            ↗
-                        </div>
-
-                        <div>
-                            <div class="stat-label">
-                                Borrowed
-                            </div>
-
-                            <div
-                                class="stat-value"
-                                id="statBorrowed"
-                            >
-                                0
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div class="stat-card">
-
-                        <div class="stat-icon unavailable">
-                            ×
-                        </div>
-
-                        <div>
-                            <div class="stat-label">
-                                Unavailable
-                            </div>
-
-                            <div
-                                class="stat-value"
-                                id="statUnavailable"
-                            >
-                                0
-                            </div>
-                        </div>
-
-                    </div>
-
+                <div class="stat-card available-stat">
+                    <div class="stat-label">Available</div>
+                    <div class="stat-number" id="statAvailable">0</div>
                 </div>
 
-
-                <!-- STATUS SUMMARY -->
-                <div class="dashboard-panel">
-
-                    <div class="panel-header">
-                        <div>
-                            <h3>Availability Overview</h3>
-                            <p>
-                                Current status of all dresses
-                            </p>
-                        </div>
-                    </div>
-
-
-                    <div class="availability-overview">
-
-                        <div class="overview-item">
-                            <span class="status-dot available-dot"></span>
-                            <span>Available</span>
-                            <strong id="overviewAvailable">0</strong>
-                        </div>
-
-
-                        <div class="overview-item">
-                            <span class="status-dot reserved-dot"></span>
-                            <span>Reserved</span>
-                            <strong id="overviewReserved">0</strong>
-                        </div>
-
-
-                        <div class="overview-item">
-                            <span class="status-dot borrowed-dot"></span>
-                            <span>Borrowed</span>
-                            <strong id="overviewBorrowed">0</strong>
-                        </div>
-
-
-                        <div class="overview-item">
-                            <span class="status-dot unavailable-dot"></span>
-                            <span>Unavailable</span>
-                            <strong id="overviewUnavailable">0</strong>
-                        </div>
-
-                    </div>
-
+                <div class="stat-card reserved-stat">
+                    <div class="stat-label">Reserved</div>
+                    <div class="stat-number" id="statReserved">0</div>
                 </div>
 
-            </section>
-
-
-            <!-- =========================
-                 INVENTORY
-            ========================== -->
-            <section
-                id="inventorySection"
-                class="section"
-            >
-
-                <div class="section-header">
-
-                    <div>
-                        <h2>Dress Inventory</h2>
-
-                        <p>
-                            Manage your dresses and availability
-                        </p>
-                    </div>
-
-                    <button
-                        type="button"
-                        class="primary-btn"
-                        id="addDressButton"
-                    >
-                        + Add Dress
-                    </button>
-
+                <div class="stat-card borrowed-stat">
+                    <div class="stat-label">Borrowed</div>
+                    <div class="stat-number" id="statBorrowed">0</div>
                 </div>
 
-
-                <!-- FILTERS -->
-                <div class="inventory-toolbar">
-
-                    <div class="search-box">
-
-                        <span>⌕</span>
-
-                        <input
-                            type="text"
-                            id="searchInput"
-                            placeholder="Search dresses..."
-                        >
-
-                    </div>
-
-
-                    <select id="categoryFilter">
-
-                        <option value="all">
-                            All Categories
-                        </option>
-
-                    </select>
-
-
-                    <select id="availabilityFilter">
-
-                        <option value="all">
-                            All Statuses
-                        </option>
-
-                        <option value="Available">
-                            Available
-                        </option>
-
-                        <option value="Reserved">
-                            Reserved
-                        </option>
-
-                        <option value="Borrowed">
-                            Borrowed
-                        </option>
-
-                        <option value="Unavailable">
-                            Unavailable
-                        </option>
-
-                    </select>
-
+                <div class="stat-card unavailable-stat">
+                    <div class="stat-label">Unavailable</div>
+                    <div class="stat-number" id="statUnavailable">0</div>
                 </div>
 
-
-                <!-- INVENTORY GRID -->
-                <div
-                    class="inventory-grid"
-                    id="inventoryGrid"
-                >
-                </div>
+            </div>
 
 
-                <div
-                    class="empty-state"
-                    id="emptyState"
-                >
+            <div class="dashboard-welcome">
 
-                    <div class="empty-icon">
-                        ◈
-                    </div>
+                <div>
+                    <span class="eyebrow">MALÉA BY PF</span>
 
-                    <h3>No dresses found</h3>
+                    <h2>
+                        Dress rental management,
+                        made simple.
+                    </h2>
 
                     <p>
-                        Add your first dress to your inventory.
+                        Manage your dresses, reservations,
+                        borrowed items and availability
+                        from one place.
                     </p>
+                </div>
 
-                    <button
-                        type="button"
+                <button type="button"
                         class="primary-btn"
-                        id="emptyAddDressButton"
-                    >
-                        + Add Dress
-                    </button>
+                        data-section-button="reservations">
+                    View Reservations
+                </button>
 
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DRESS INVENTORY
+        ================================================== -->
+
+        <section class="section" id="inventory">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">INVENTORY</span>
+                    <h2>Dress Inventory</h2>
+                    <p>Manage your available rental dresses.</p>
                 </div>
 
-            </section>
+                <button type="button"
+                        class="primary-btn"
+                        id="addDressButton">
+                    + Add Dress
+                </button>
+
+            </div>
 
 
-            <!-- =========================
-                 PLACEHOLDER SECTIONS
-            ========================== -->
+            <div class="toolbar">
 
-            <section
-                id="reservationsSection"
-                class="section"
-            >
+                <input
+                    type="search"
+                    id="searchInput"
+                    placeholder="Search dresses..."
+                >
 
-                <div class="placeholder-panel">
-                    <div class="placeholder-icon">▣</div>
+                <select id="categoryFilter">
+                    <option value="all">All Categories</option>
+                </select>
+
+                <select id="availabilityFilter">
+                    <option value="all">All Status</option>
+                    <option value="Available">Available</option>
+                    <option value="Reserved">Reserved</option>
+                    <option value="Borrowed">Borrowed</option>
+                    <option value="Unavailable">Unavailable</option>
+                </select>
+
+            </div>
+
+
+            <div class="inventory-grid"
+                 id="inventoryGrid">
+            </div>
+
+
+            <div class="empty-state"
+                 id="emptyState"
+                 hidden>
+                <div class="empty-icon">♡</div>
+                <h3>No dresses found</h3>
+                <p>Add your first dress to begin managing inventory.</p>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             RESERVATIONS
+        ================================================== -->
+
+        <section class="section"
+                 id="reservations">
+
+            <div class="section-heading">
+
+                <div>
+                    <span class="eyebrow">BOOKINGS</span>
+
                     <h2>Reservations</h2>
-                    <p>Reservation management will be added next.</p>
+
+                    <p>
+                        Manage all dress reservations.
+                    </p>
                 </div>
 
-            </section>
+                <button type="button"
+                        class="primary-btn"
+                        id="addReservationButton">
+                    + New Reservation
+                </button>
+
+            </div>
 
 
-            <section
-                id="customersSection"
-                class="section"
-            >
+            <div class="toolbar">
 
-                <div class="placeholder-panel">
-                    <div class="placeholder-icon">♙</div>
-                    <h2>Customers</h2>
-                    <p>Customer management will be added later.</p>
-                </div>
+                <input
+                    type="search"
+                    id="reservationSearch"
+                    placeholder="Search reservations..."
+                >
 
-            </section>
+                <select id="reservationStatusFilter">
 
+                    <option value="all">
+                        All Status
+                    </option>
 
-            <section
-                id="calendarSection"
-                class="section"
-            >
+                    <option value="Pending">
+                        Pending
+                    </option>
 
-                <div class="placeholder-panel">
-                    <div class="placeholder-icon">◷</div>
-                    <h2>Rental Calendar</h2>
-                    <p>Rental calendar will be added later.</p>
-                </div>
+                    <option value="Confirmed">
+                        Confirmed
+                    </option>
 
-            </section>
+                    <option value="Cancelled">
+                        Cancelled
+                    </option>
 
+                    <option value="Completed">
+                        Completed
+                    </option>
 
-            <section
-                id="paymentsSection"
-                class="section"
-            >
+                </select>
 
-                <div class="placeholder-panel">
-                    <div class="placeholder-icon">₱</div>
-                    <h2>Payments</h2>
-                    <p>Payment monitoring will be added later.</p>
-                </div>
-
-            </section>
+            </div>
 
 
-            <section
-                id="reportsSection"
-                class="section"
-            >
-
-                <div class="placeholder-panel">
-                    <div class="placeholder-icon">▤</div>
-                    <h2>Reports</h2>
-                    <p>Reports will be added later.</p>
-                </div>
-
-            </section>
+            <div class="reservations-list"
+                 id="reservationsList">
+            </div>
 
 
-            <section
-                id="settingsSection"
-                class="section"
-            >
+            <div class="empty-state"
+                 id="reservationsEmptyState"
+                 hidden>
 
-                <div class="placeholder-panel">
-                    <div class="placeholder-icon">⚙</div>
-                    <h2>Settings</h2>
-                    <p>Settings will be added later.</p>
-                </div>
+                <div class="empty-icon">♡</div>
 
-            </section>
+                <h3>No reservations found</h3>
 
-        </div>
+                <p>
+                    Create your first reservation
+                    to start managing bookings.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             OTHER SECTIONS
+        ================================================== -->
+
+        <section class="section placeholder-section"
+                 id="customers">
+
+            <span class="eyebrow">CUSTOMERS</span>
+            <h2>Customers</h2>
+            <p>Customer management will be added here.</p>
+
+        </section>
+
+
+        <section class="section placeholder-section"
+                 id="calendar">
+
+            <span class="eyebrow">CALENDAR</span>
+            <h2>Rental Calendar</h2>
+            <p>Rental calendar will be added here.</p>
+
+        </section>
+
+
+        <section class="section placeholder-section"
+                 id="payments">
+
+            <span class="eyebrow">PAYMENTS</span>
+            <h2>Payments</h2>
+            <p>Payment monitoring will be added here.</p>
+
+        </section>
+
+
+        <section class="section placeholder-section"
+                 id="reports">
+
+            <span class="eyebrow">REPORTS</span>
+            <h2>Reports</h2>
+            <p>Reports will be added here.</p>
+
+        </section>
+
+
+        <section class="section placeholder-section"
+                 id="settings">
+
+            <span class="eyebrow">SETTINGS</span>
+            <h2>Settings</h2>
+            <p>System settings will be added here.</p>
+
+        </section>
 
     </main>
 
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
      DRESS MODAL
-========================== -->
-<div
-    class="modal"
-    id="dressModal"
->
+========================================================= -->
 
-    <div class="modal-overlay" id="modalOverlay"></div>
+<div class="modal"
+     id="dressModal">
 
+    <div class="modal-overlay"
+         data-close-dress-modal></div>
 
-    <div class="modal-card">
+    <div class="modal-box">
 
         <div class="modal-header">
 
             <div>
-                <h2 id="modalTitle">
-                    Add Dress
-                </h2>
-
-                <p>
-                    Enter the dress information below.
-                </p>
+                <span class="eyebrow">INVENTORY</span>
+                <h2 id="dressModalTitle">Add Dress</h2>
             </div>
 
-            <button
-                type="button"
-                class="modal-close"
-                id="closeModalButton"
-            >
+            <button type="button"
+                    class="modal-close"
+                    id="closeDressModal">
                 ×
             </button>
 
@@ -639,50 +436,43 @@
 
         <form id="dressForm">
 
-            <input
-                type="hidden"
-                id="dressId"
-            >
+            <input type="hidden"
+                   id="dressId">
 
 
             <div class="form-grid">
 
-                <!-- NAME -->
-                <div class="form-field full-width">
+                <div class="form-group full-width">
 
                     <label for="dressName">
-                        Dress Name
+                        Dress Name *
                     </label>
 
                     <input
                         type="text"
                         id="dressName"
                         required
-                        placeholder="e.g. Burgundy Evening Gown"
                     >
 
                 </div>
 
 
-                <!-- CATEGORY -->
-                <div class="form-field">
+                <div class="form-group">
 
                     <label for="dressCategory">
-                        Category
+                        Category *
                     </label>
 
                     <input
                         type="text"
                         id="dressCategory"
                         required
-                        placeholder="e.g. Evening"
                     >
 
                 </div>
 
 
-                <!-- SIZE -->
-                <div class="form-field">
+                <div class="form-group">
 
                     <label for="dressSize">
                         Size
@@ -691,17 +481,15 @@
                     <input
                         type="text"
                         id="dressSize"
-                        placeholder="e.g. Small / Medium"
                     >
 
                 </div>
 
 
-                <!-- PRICE -->
-                <div class="form-field">
+                <div class="form-group">
 
                     <label for="dressPrice">
-                        Rental Price
+                        Rental Price *
                     </label>
 
                     <input
@@ -709,33 +497,16 @@
                         id="dressPrice"
                         min="0"
                         step="0.01"
-                        placeholder="1500"
+                        required
                     >
 
                 </div>
 
 
-                <!-- COLOR -->
-                <div class="form-field">
-
-                    <label for="dressColor">
-                        Color
-                    </label>
-
-                    <input
-                        type="text"
-                        id="dressColor"
-                        placeholder="e.g. Burgundy"
-                    >
-
-                </div>
-
-
-                <!-- AVAILABILITY -->
-                <div class="form-field full-width">
+                <div class="form-group">
 
                     <label for="dressAvailability">
-                        Availability Status
+                        Status *
                     </label>
 
                     <select id="dressAvailability">
@@ -758,15 +529,24 @@
 
                     </select>
 
-                    <small class="field-help">
-                        This status controls how the dress appears in your inventory.
-                    </small>
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label for="dressColor">
+                        Color
+                    </label>
+
+                    <input
+                        type="text"
+                        id="dressColor"
+                    >
 
                 </div>
 
 
-                <!-- PHOTO -->
-                <div class="form-field full-width">
+                <div class="form-group full-width">
 
                     <label for="dressPhoto">
                         Dress Photo
@@ -778,16 +558,14 @@
                         accept="image/*"
                     >
 
-                    <div
-                        class="photo-preview"
-                        id="photoPreview"
-                    ></div>
+                    <div class="photo-preview"
+                         id="photoPreview">
+                    </div>
 
                 </div>
 
 
-                <!-- NOTES -->
-                <div class="form-field full-width">
+                <div class="form-group full-width">
 
                     <label for="dressNotes">
                         Notes
@@ -795,30 +573,24 @@
 
                     <textarea
                         id="dressNotes"
-                        rows="4"
-                        placeholder="Additional information..."
-                    ></textarea>
+                        rows="4">
+                    </textarea>
 
                 </div>
 
             </div>
 
 
-            <div class="modal-footer">
+            <div class="modal-actions">
 
-                <button
-                    type="button"
-                    class="secondary-btn"
-                    id="cancelModalButton"
-                >
+                <button type="button"
+                        class="secondary-btn"
+                        id="cancelDressButton">
                     Cancel
                 </button>
 
-                <button
-                    type="submit"
-                    class="primary-btn"
-                    id="saveDressButton"
-                >
+                <button type="submit"
+                        class="primary-btn">
                     Save Dress
                 </button>
 
@@ -831,10 +603,587 @@
 </div>
 
 
-<!-- =========================
+<!-- =========================================================
+     RESERVATION MODAL
+========================================================= -->
+
+<div class="modal"
+     id="reservationModal">
+
+    <div class="modal-overlay"
+         data-close-reservation-modal></div>
+
+    <div class="modal-box reservation-modal-box">
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="eyebrow">
+                    RESERVATION
+                </span>
+
+                <h2 id="reservationModalTitle">
+                    New Reservation
+                </h2>
+
+            </div>
+
+            <button type="button"
+                    class="modal-close"
+                    id="closeReservationModal">
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="reservationForm">
+
+            <input type="hidden"
+                   id="reservationDocumentId">
+
+
+            <div class="form-grid">
+
+
+                <!-- RESERVATION ID -->
+
+                <div class="form-group full-width">
+
+                    <label for="reservationIdDisplay">
+                        Reservation ID
+                    </label>
+
+                    <input
+                        type="text"
+                        id="reservationIdDisplay"
+                        readonly
+                        placeholder="Generated automatically"
+                    >
+
+                    <small>
+                        This ID cannot be changed.
+                    </small>
+
+                </div>
+
+
+                <!-- CUSTOMER -->
+
+                <div class="form-group">
+
+                    <label for="reservationCustomer">
+                        Customer *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="reservationCustomer"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- CONTACT -->
+
+                <div class="form-group">
+
+                    <label for="reservationContact">
+                        Contact Number *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="reservationContact"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- DRESS -->
+
+                <div class="form-group full-width">
+
+                    <label for="reservationDress">
+                        Dress *
+                    </label>
+
+                    <select
+                        id="reservationDress"
+                        required>
+                    </select>
+
+                </div>
+
+
+                <!-- RESERVATION DATE -->
+
+                <div class="form-group full-width">
+
+                    <label for="reservationDate">
+                        Reservation Date *
+                    </label>
+
+                    <input
+                        type="date"
+                        id="reservationDate"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PICKUP -->
+
+                <div class="form-group">
+
+                    <label for="reservationPickup">
+                        Pickup Date *
+                    </label>
+
+                    <input
+                        type="date"
+                        id="reservationPickup"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- RETURN -->
+
+                <div class="form-group">
+
+                    <label for="reservationReturn">
+                        Return Date *
+                    </label>
+
+                    <input
+                        type="date"
+                        id="reservationReturn"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- RENTAL PRICE -->
+
+                <div class="form-group">
+
+                    <label for="reservationPrice">
+                        Rental Price (₱) *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="reservationPrice"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- DEPOSIT -->
+
+                <div class="form-group">
+
+                    <label for="reservationDeposit">
+                        Deposit (₱) *
+                    </label>
+
+                    <input
+                        type="number"
+                        id="reservationDeposit"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PAYMENT -->
+
+                <div class="form-group">
+
+                    <label for="reservationPayment">
+                        Payment Status *
+                    </label>
+
+                    <select id="reservationPayment">
+
+                        <option value="Unpaid">
+                            Unpaid
+                        </option>
+
+                        <option value="Partial">
+                            Partial
+                        </option>
+
+                        <option value="Paid">
+                            Paid
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- RESERVATION STATUS -->
+
+                <div class="form-group">
+
+                    <label for="reservationStatus">
+                        Reservation Status *
+                    </label>
+
+                    <select id="reservationStatus">
+
+                        <option value="Pending">
+                            Pending
+                        </option>
+
+                        <option value="Confirmed">
+                            Confirmed
+                        </option>
+
+                        <option value="Cancelled">
+                            Cancelled
+                        </option>
+
+                        <option value="Completed">
+                            Completed
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- NOTES -->
+
+                <div class="form-group full-width">
+
+                    <label for="reservationNotes">
+                        Notes
+                    </label>
+
+                    <textarea
+                        id="reservationNotes"
+                        rows="4">
+                    </textarea>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button type="button"
+                        class="secondary-btn"
+                        id="cancelReservationButton">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                        class="primary-btn"
+                        id="saveReservationButton">
+                    Save Reservation
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     CUSTOMER RESERVATION CARD MODAL
+========================================================= -->
+
+<div class="modal reservation-card-modal"
+     id="customerReservationCardModal">
+
+    <div class="modal-overlay"
+         data-close-customer-card></div>
+
+
+    <div class="reservation-card-modal-box">
+
+        <div class="reservation-card-modal-header">
+
+            <div>
+
+                <span class="eyebrow">
+                    CUSTOMER COPY
+                </span>
+
+                <h2>Reservation Card</h2>
+
+            </div>
+
+            <button type="button"
+                    class="modal-close"
+                    id="closeCustomerReservationCard">
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             SCREENSHOT CARD
+        ================================================== -->
+
+        <div class="customer-card"
+             id="reservationCardPreview">
+
+            <div class="customer-card-border">
+
+
+                <!-- FLORAL DECOR -->
+
+                <div class="card-floral floral-top-left">
+                    ❀
+                </div>
+
+                <div class="card-floral floral-bottom-right">
+                    ❀
+                </div>
+
+
+                <!-- BRAND -->
+
+                <div class="customer-card-brand">
+
+                    <div class="customer-brand-name">
+                        MALÉA
+                    </div>
+
+                    <div class="customer-brand-subtitle">
+                        BY PF
+                    </div>
+
+                </div>
+
+
+                <div class="card-divider"></div>
+
+
+                <div class="customer-card-title">
+                    RESERVATION CARD
+                </div>
+
+
+                <!-- RESERVATION ID -->
+
+                <div class="customer-reservation-id"
+                     id="cardReservationId">
+                </div>
+
+
+                <!-- CUSTOMER -->
+
+                <div class="customer-card-section">
+
+                    <div class="customer-card-label">
+                        CUSTOMER
+                    </div>
+
+                    <div class="customer-card-value"
+                         id="cardCustomer">
+                    </div>
+
+                </div>
+
+
+                <!-- CONTACT -->
+
+                <div class="customer-card-section">
+
+                    <div class="customer-card-label">
+                        CONTACT
+                    </div>
+
+                    <div class="customer-card-value"
+                         id="cardContact">
+                    </div>
+
+                </div>
+
+
+                <!-- DRESS -->
+
+                <div class="customer-card-dress">
+
+                    <div class="customer-card-section">
+
+                        <div class="customer-card-label">
+                            DRESS
+                        </div>
+
+                        <div class="customer-card-value"
+                             id="cardDress">
+                        </div>
+
+                    </div>
+
+
+                    <div class="customer-card-photo-wrap">
+
+                        <img id="cardDressPhoto"
+                             class="customer-card-photo"
+                             alt="Dress">
+
+                    </div>
+
+                </div>
+
+
+                <!-- PICKUP -->
+
+                <div class="customer-card-section">
+
+                    <div class="customer-card-label">
+                        PICKUP DATE
+                    </div>
+
+                    <div class="customer-card-value"
+                         id="cardPickup">
+                    </div>
+
+                </div>
+
+
+                <!-- RETURN -->
+
+                <div class="customer-card-section">
+
+                    <div class="customer-card-label">
+                        RETURN DATE
+                    </div>
+
+                    <div class="customer-card-value"
+                         id="cardReturn">
+                    </div>
+
+                </div>
+
+
+                <div class="card-divider"></div>
+
+
+                <!-- PRICE -->
+
+                <div class="customer-card-price-row">
+
+                    <span>
+                        RENTAL FEE
+                    </span>
+
+                    <strong id="cardRentalPrice">
+                    </strong>
+
+                </div>
+
+
+                <div class="customer-card-price-row">
+
+                    <span>
+                        DEPOSIT
+                    </span>
+
+                    <strong id="cardDeposit">
+                    </strong>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="customer-card-status-row">
+
+                    <span>
+                        PAYMENT STATUS
+                    </span>
+
+                    <span class="customer-status payment"
+                          id="cardPaymentStatus">
+                    </span>
+
+                </div>
+
+
+                <div class="customer-card-status-row">
+
+                    <span>
+                        RESERVATION STATUS
+                    </span>
+
+                    <span class="customer-status reservation"
+                          id="cardReservationStatus">
+                    </span>
+
+                </div>
+
+
+                <!-- FOOTER -->
+
+                <div class="customer-card-thank-you">
+
+                    <div class="thank-you-script">
+                        Thank you ♡
+                    </div>
+
+                    <div>
+                        for choosing
+                    </div>
+
+                    <strong>
+                        Maléa by PF
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="customer-card-actions">
+
+            <button type="button"
+                    class="secondary-btn"
+                    id="closeCustomerReservationCardBottom">
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
      LOGIN SCREEN
-========================== -->
-<div id="adminLoginScreen"></div>
+========================================================= -->
+
+<div id="adminLoginScreen"
+     class="login-screen"
+     hidden>
+</div>
+
 
 </body>
 </html>
