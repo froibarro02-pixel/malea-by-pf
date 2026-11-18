@@ -1,0 +1,16 @@
+# Environment and sensitive credentials
+.env
+.env.*
+!.env.example
+.firebase-key-base64.txt
+malea-by-pf-26fdd7d7ad60.json
+service-account*.json
+firebase-adminsdk*.json
+
+# Dependencies and generated files
+node_modules/
+.netlify/
+
+# System files
+.DS_Store
+Thumbs.db

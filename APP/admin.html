@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#5a1f2a">
+  <title>Maléa by PF — Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-brand-mark">M</div>
+      <h1>Maléa</h1>
+      <p class="login-subtitle">by PF · Admin Access</p>
+      <form class="login-form" id="loginForm">
+        <label for="loginEmail">Email Address</label>
+        <input type="email" id="loginEmail" placeholder="Enter your admin email" autocomplete="username" required>
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password"
+          required>
+        <button type="submit" id="loginButton">Sign In</button>
+        <div id="loginMessage" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-shell" style="display:none;">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+          <div class="brand-name">Maléa</div>
+          <div class="brand-sub">by PF</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item" data-section="dashboard">⌂ Dashboard</button>
+        <button class="nav-item active" data-section="inventory">◇ Dress Inventory</button>
+        <button class="nav-item" data-section="reservations">□ Reservations</button>
+        <button class="nav-item" data-section="customers">♙ Customers</button>
+        <button class="nav-item" data-section="calendar">▦ Rental Calendar</button>
+        <button class="nav-item" data-section="payments">₱ Payments</button>
+        <button class="nav-item" data-section="reports">▤ Reports</button>
+        <button class="nav-item" data-section="settings">⚙ Settings</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        Admin mode
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu">☰</button>
+        <div>
+          <h1 id="pageTitle">Dress Inventory</h1>
+          <p id="pageSubtitle">Manage your dresses and rental availability.</p>
+        </div>
+        <div class="topbar-actions"><span class="admin-badge">ADMIN</span><button type="button" class="logout-btn"
+            id="logoutButton">Log Out</button></div>
+      </header>
+
+      <div class="content">
+        <section class="section" id="dashboardSection">
+          <div class="section-heading">
+            <div>
+              <h2>Dashboard</h2>
+              <p>A quick overview of your rental business.</p>
+            </div>
+            <button class="primary-btn" data-open-add>+ Add Dress</button>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card"><span>Total Dresses</span><strong id="statTotal">0</strong></div>
+            <div class="stat-card"><span>Available</span><strong id="statAvailable">0</strong></div>
+            <div class="stat-card"><span>Reserved</span><strong id="statReserved">0</strong></div>
+            <div class="stat-card"><span>Rented</span><strong id="statRented">0</strong></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h3>Recent Inventory</h3>
+              <button class="text-btn" data-go="inventory">View all</button>
+            </div>
+            <div id="dashboardRecent" class="recent-list"></div>
+          </div>
+        </section>
+
+        <section class="section active-section" id="inventorySection">
+          <div class="section-heading">
+            <div>
+              <h2>Dress Inventory</h2>
+              <p>Manage your dresses and rental availability.</p>
+            </div>
+            <button class="primary-btn" data-open-add>+ Add Dress</button>
+          </div>
+
+          <div class="inventory-actions">
+            <button type="button" class="secondary-btn" id="openBulkImport">Bulk Import</button>
+            <button type="button" class="secondary-btn" id="undoLastImportButton" disabled>
+              ↶ Undo Last Import
+            </button>
+          </div>
+
+          <div class="toolbar">
+            <div class="search-wrap">
+              <span>⌕</span>
+              <input id="searchInput" type="search" placeholder="Search dresses...">
+            </div>
+
+            <select id="categoryFilter">
+              <option value="">All Categories</option>
+              <option>Gown</option>
+              <option>Cocktail</option>
+              <option>Formal</option>
+              <option>Bridal</option>
+              <option>Debut</option>
+              <option>Other</option>
+            </select>
+
+            <select id="availabilityFilter">
+              <option value="">All Availability</option>
+              <option>Available</option>
+              <option>Reserved</option>
+              <option>Rented</option>
+              <option>Maintenance</option>
+            </select>
+          </div>
+
+          <div id="inventoryGrid" class="inventory-grid"></div>
+
+          <div id="emptyState" class="empty-state">
+            <div class="empty-icon">◇</div>
+            <h3>No dresses added yet</h3>
+            <p>Add your first dress to start building your inventory.</p>
+            <button class="primary-btn" data-open-add>+ Add First Dress</button>
+          </div>
+        </section>
+
+        <section class="section" id="reservationsSection">
+          <div class="section-heading">
+            <div>
+              <h2>Reservations</h2>
+              <p>Manage customer reservations.</p>
+            </div>
+          </div>
+          <div class="reservation-toolbar">
+            <div class="reservation-search"><span>⌕</span><input id="reservationSearch" type="search"
+                placeholder="Search customer, dress, or reference..."></div>
+            <select id="reservationStatusFilter" aria-label="Filter reservations by status">
+              <option value="">All status</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Completed">Completed</option>
+            </select>
+            <button type="button" class="secondary-btn" id="refreshReservationsButton">↻ Refresh</button>
+          </div>
+          <div class="reservation-summary">
+            <div><span>Total reservations</span><strong id="reservationTotal">0</strong></div>
+            <div><span>Pending</span><strong id="reservationPending">0</strong></div>
+            <div><span>Confirmed</span><strong id="reservationConfirmed">0</strong></div>
+            <div><span>Completed</span><strong id="reservationCompleted">0</strong></div>
+          </div>
+          <div class="reservation-table-wrap">
+            <table class="reservation-table">
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Customer</th>
+                  <th>Dress</th>
+                  <th>Rental dates</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="reservationsTableBody">
+                <tr>
+                  <td colspan="7" class="reservation-table-message">Open Reservations to load records.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="reservation-footnote">Records are loaded from the Firestore <strong>reservations</strong>
+            collection. This first connection is read-only; status changes are not enabled yet.</p>
+        </section>
+
+        <section class="section" id="customersSection">
+          <div class="section-heading">
+            <div>
+              <h2>Customers</h2>
+              <p>Manage customer records.</p>
+            </div>
+          </div>
+          <div class="coming-soon">
+            <h3>Customers</h3>
+            <p>Customer records will appear here.</p>
+          </div>
+        </section>
+
+        <section class="section" id="calendarSection">
+          <div class="section-heading">
+            <div>
+              <h2>Rental Calendar</h2>
+              <p>View your rental schedule.</p>
+            </div>
+          </div>
+          <div class="coming-soon">
+            <h3>Rental Calendar</h3>
+            <p>Your rental calendar will appear here.</p>
+          </div>
+        </section>
+
+        <section class="section" id="paymentsSection">
+          <div class="section-heading">
+            <div>
+              <h2>Payments</h2>
+              <p>Track rental payments and balances.</p>
+            </div>
+          </div>
+          <div class="coming-soon">
+            <h3>Payments</h3>
+            <p>Payment records will appear here.</p>
+          </div>
+        </section>
+
+        <section class="section" id="reportsSection">
+          <div class="section-heading">
+            <div>
+              <h2>Reports</h2>
+              <p>View inventory and rental reports.</p>
+            </div>
+          </div>
+          <div class="coming-soon">
+            <h3>Reports</h3>
+            <p>Inventory and rental reports will appear here.</p>
+          </div>
+        </section>
+
+        <section class="section" id="settingsSection">
+          <div class="section-heading">
+            <div>
+              <h2>Settings</h2>
+              <p>Manage your system settings.</p>
+            </div>
+          </div>
+          <div class="coming-soon">
+            <h3>Settings</h3>
+            <p>System settings will appear here.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- RESERVATION DETAILS MODAL -->
+  <div class="modal" id="reservationDetailsModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-reservation-details></div>
+    <div class="modal-card reservation-details-card">
+      <div class="modal-header">
+        <div>
+          <h2>Reservation Details</h2>
+          <p id="reservationDetailsReference">Reservation information</p>
+        </div>
+        <button class="icon-btn" type="button" data-close-reservation-details aria-label="Close">×</button>
+      </div>
+      <div id="reservationDetailsContent" class="reservation-details-content"></div>
+      <div class="modal-actions"><button type="button" class="secondary-btn"
+          data-close-reservation-details>Close</button></div>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT DRESS MODAL -->
+  <div class="modal" id="dressModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 id="modalTitle">Add Dress</h2>
+          <p>Enter the dress information below.</p>
+        </div>
+        <button class="icon-btn" type="button" data-close-modal>×</button>
+      </div>
+
+      <form id="dressForm">
+        <input type="hidden" id="dressId">
+
+        <div class="form-grid">
+          <label>
+            Dress Name
+            <input id="dressName" required placeholder="e.g. Burgundy Evening Gown">
+          </label>
+
+          <label>
+            Category
+            <input id="dressCategory" type="text" list="categorySuggestions" placeholder="Type or select a category"
+              autocomplete="off" required>
+            <datalist id="categorySuggestions"></datalist>
+          </label>
+
+          <label>
+            Size
+            <input id="dressSize" placeholder="e.g. S, M, L">
+          </label>
+
+          <label>
+            Rental Price
+            <input id="dressPrice" type="number" min="0" step="0.01" placeholder="0.00">
+          </label>
+
+          <label>
+            Availability
+            <select id="dressAvailability">
+              <option>Available</option>
+              <option>Reserved</option>
+              <option>Rented</option>
+              <option>Maintenance</option>
+            </select>
+          </label>
+
+          <label>
+            Color
+            <input id="dressColor" placeholder="e.g. Burgundy">
+          </label>
+
+          <label class="full">
+            Dress Photo
+            <input type="file" id="dressImage" accept="image/jpeg,image/png,image/webp">
+            <span class="image-upload-hint">JPG, PNG or WEBP · Maximum 5 MB</span>
+            <div id="dressImagePreview" class="dress-image-preview">
+              <span>Dress photo preview</span>
+            </div>
+          </label>
+
+          <label class="full">
+            Notes
+            <textarea id="dressNotes" rows="3" placeholder="Optional notes"></textarea>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-btn" data-close-modal>Cancel</button>
+          <button type="submit" class="primary-btn" id="saveDressButton">Save Dress</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BULK IMPORT MODAL -->
+  <div class="modal" id="bulkImportModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-import></div>
+
+    <div class="modal-card bulk-import-card">
+      <div class="modal-header">
+        <div>
+          <h2>Bulk Import Dresses</h2>
+          <p>Upload the Maléa spreadsheet, check the entries, then import them to Firestore.</p>
+        </div>
+        <button class="icon-btn" type="button" data-close-import aria-label="Close">×</button>
+      </div>
+
+      <div class="bulk-import-instructions">
+        <strong>Before importing</strong>
+        <p>
+          Use an XLSX workbook with one embedded photo per dress row. Put each photo's
+          top-left corner inside its matching row, preferably under the Photo column.
+          Photos are uploaded to Cloudinary during import. Existing dress codes and
+          duplicate codes within the workbook are skipped.
+        </p>
+      </div>
+
+      <label class="bulk-file-label">
+        Excel spreadsheet (.xlsx)
+        <input type="file" id="bulkImportFile" accept=".xlsx">
+      </label>
+
+      <div id="bulkImportStatus" class="bulk-import-status" aria-live="polite">
+        Choose the review spreadsheet to preview its entries.
+      </div>
+
+      <div id="bulkImportPreview" class="bulk-import-preview"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" data-close-import>Cancel</button>
+        <button type="button" class="primary-btn" id="confirmBulkImport" disabled>Import Dresses</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXCELJS: READS SPREADSHEET DATA AND EMBEDDED PHOTOS -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <!-- FIREBASE COMPAT SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCo6oYU8RpConNDMzBUs8CQyIfG2gm0kic",
+      authDomain: "malea-by-pf.firebaseapp.com",
+      projectId: "malea-by-pf",
+      messagingSenderId: "333548918088",
+      appId: "1:333548918088:web:c6c12137723295ba50f7d",
+      measurementId: "G-YSPJ3BKT9B"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
+
+  <script src="js/admin.js?"></script>
+</body>
+
+</html>
