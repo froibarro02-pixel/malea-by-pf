@@ -1390,3 +1390,280 @@ button {
         padding: 14px;
     }
 }
+
+/* =========================================
+   MALEA RESERVATION CONFIRMATION CARD
+========================================= */
+
+.confirmation-card-modal {
+    width: min(94vw, 440px);
+    max-width: 440px;
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+.renter-confirmation-card {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    padding: 22px;
+    box-sizing: border-box;
+    background: #fbf7f2;
+    color: #302326;
+    border: 1px solid #eadfda;
+    border-radius: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.confirmation-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.confirmation-brand-mark {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #5a1f2a;
+    color: #fff;
+    border-radius: 50%;
+    font-family: Georgia, serif;
+    font-size: 23px;
+}
+
+.confirmation-brand-name {
+    color: #5a1f2a;
+    font-family: Georgia, serif;
+    font-size: 23px;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+.confirmation-brand-sub {
+    color: #887c7f;
+    font-size: 8px;
+    letter-spacing: 2px;
+    margin-top: 2px;
+}
+
+.confirmation-status {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px;
+    background: #f1e6e4;
+    border-radius: 9px;
+    margin-bottom: 14px;
+}
+
+.confirmation-check {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: #5a1f2a;
+    color: white;
+    border-radius: 50%;
+    font-size: 17px;
+}
+
+.confirmation-status strong,
+.confirmation-status span:not(.confirmation-check) {
+    display: block;
+}
+
+.confirmation-status strong {
+    color: #5a1f2a;
+    font-size: 11px;
+    letter-spacing: 0.7px;
+}
+
+.confirmation-status div span {
+    color: #887c7f;
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.confirmation-reference {
+    text-align: center;
+    padding: 11px;
+    border: 1px dashed #c9afb0;
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+
+.confirmation-reference span,
+.confirmation-reference strong {
+    display: block;
+}
+
+.confirmation-reference span,
+.confirmation-section-title,
+.confirmation-dates span {
+    color: #887c7f;
+    font-size: 8px;
+    letter-spacing: 1.2px;
+    font-weight: bold;
+}
+
+.confirmation-reference strong {
+    color: #5a1f2a;
+    font-size: 17px;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    overflow-wrap: anywhere;
+}
+
+.confirmation-card-section {
+    padding: 10px 0;
+    border-bottom: 1px solid #e9dfda;
+}
+
+.confirmation-section-title {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.confirmation-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 6px 0;
+    font-size: 10px;
+}
+
+.confirmation-info-row span {
+    color: #887c7f;
+    flex-shrink: 0;
+}
+
+.confirmation-info-row strong {
+    color: #302326;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.confirmation-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9dfda;
+}
+
+.confirmation-dates div {
+    padding: 9px;
+    background: #f2eae5;
+    border-radius: 7px;
+}
+
+.confirmation-dates span,
+.confirmation-dates strong {
+    display: block;
+}
+
+.confirmation-dates strong {
+    color: #5a1f2a;
+    font-size: 11px;
+    margin-top: 5px;
+    overflow-wrap: anywhere;
+}
+
+.confirmation-payment {
+    border-bottom: none;
+}
+
+.confirmation-reminder {
+    padding: 10px;
+    margin-top: 8px;
+    background: #f1e6e4;
+    border-left: 3px solid #5a1f2a;
+    border-radius: 5px;
+    color: #66575a;
+    font-size: 9px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.confirmation-footer {
+    margin-top: 13px;
+    color: #887c7f;
+    font-size: 8px;
+    letter-spacing: 1.3px;
+    text-align: center;
+}
+
+.confirmation-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.confirmation-card-actions button {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 480px) {
+    .confirmation-card-modal {
+        width: 95vw;
+        padding: 14px;
+    }
+
+    .renter-confirmation-card {
+        padding: 18px;
+    }
+
+    .confirmation-card-actions {
+        flex-direction: column;
+    }
+}
+
+/* Print only the confirmation card */
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+
+    #confirmationCard,
+    #confirmationCard * {
+        visibility: visible !important;
+    }
+
+    #confirmationCard {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 360px !important;
+        max-width: 360px !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Clickable reservation rows */
+.clickable-reservation-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.clickable-reservation-row:hover {
+    background-color: #f5e9eb;
+}
+
+.clickable-reservation-row:focus-visible {
+    outline: 2px solid #5a1f2a;
+    outline-offset: -2px;
+}
+
+.clickable-reservation-row button {
+    cursor: pointer;
+}

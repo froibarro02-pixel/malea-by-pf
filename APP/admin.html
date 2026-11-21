@@ -352,7 +352,101 @@
       </form>
     </div>
   </div>
+<!-- CONFIRMED RESERVATION CARD MODAL -->
+<div class="modal" id="confirmationCardModal" aria-hidden="true">
+  <div class="modal-backdrop" data-close-confirmation-card></div>
 
+  <div class="modal-card confirmation-card-modal">
+    <div class="modal-header">
+      <div>
+        <h2>Reservation Confirmation</h2>
+        <p>Customer pickup reference card</p>
+      </div>
+      <button class="icon-btn" type="button"
+        data-close-confirmation-card aria-label="Close">×</button>
+    </div>
+
+    <div id="confirmationCard" class="renter-confirmation-card">
+      <div class="confirmation-brand">
+        <div class="confirmation-brand-mark">M</div>
+        <div>
+          <div class="confirmation-brand-name">MALEA</div>
+          <div class="confirmation-brand-sub">BY PF · DRESS RENTAL</div>
+        </div>
+      </div>
+
+      <div class="confirmation-status">
+        <span class="confirmation-check">✓</span>
+        <div>
+          <strong>RESERVATION CONFIRMED</strong>
+          <span>Your dress is reserved!</span>
+        </div>
+      </div>
+
+      <div class="confirmation-reference">
+        <span>RESERVATION REFERENCE</span>
+        <strong id="cardReference">—</strong>
+      </div>
+
+      <div class="confirmation-card-section">
+        <span class="confirmation-section-title">RENTER INFORMATION</span>
+        <div class="confirmation-info-row">
+          <span>Customer</span>
+          <strong id="cardCustomer">—</strong>
+        </div>
+        <div class="confirmation-info-row">
+          <span>Contact</span>
+          <strong id="cardContact">—</strong>
+        </div>
+      </div>
+
+      <div class="confirmation-card-section">
+        <span class="confirmation-section-title">DRESS DETAILS</span>
+        <div class="confirmation-info-row">
+          <span>Dress</span>
+          <strong id="cardDress">—</strong>
+        </div>
+        <div class="confirmation-info-row">
+          <span>Size / Color</span>
+          <strong id="cardSizeColor">—</strong>
+        </div>
+      </div>
+
+      <div class="confirmation-dates">
+        <div>
+          <span>PICKUP DATE</span>
+          <strong id="cardPickup">—</strong>
+        </div>
+        <div>
+          <span>RETURN DATE</span>
+          <strong id="cardReturn">—</strong>
+        </div>
+      </div>
+
+      <div class="confirmation-card-section confirmation-payment">
+        <span class="confirmation-section-title">PAYMENT DETAILS</span>
+        <div class="confirmation-info-row">
+          <span>Rental Price</span>
+          <strong id="cardPrice">—</strong>
+        </div>
+      </div>
+
+      <div class="confirmation-reminder">
+        Please present this confirmation card when claiming your
+        reserved dress. Thank you for choosing Maléa!
+      </div>
+
+      <div class="confirmation-footer">MALEA BY PF · YOUR MOMENT, YOUR STYLE</div>
+    </div>
+
+    <div class="confirmation-card-actions">
+      <button type="button" class="secondary-btn"
+        id="printConfirmationCard">Print</button>
+      <button type="button" class="primary-btn"
+        id="downloadConfirmationCard">Download Image</button>
+    </div>
+  </div>
+</div>
   <!-- BULK IMPORT MODAL -->
   <div class="modal" id="bulkImportModal" aria-hidden="true">
     <div class="modal-backdrop" data-close-import></div>
@@ -397,7 +491,7 @@
   <!-- EXCELJS: READS SPREADSHEET DATA AND EMBEDDED PHOTOS -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <!-- FIREBASE COMPAT SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>

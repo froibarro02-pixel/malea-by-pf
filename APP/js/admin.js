@@ -225,17 +225,16 @@ function renderInventory() {
 
         card.innerHTML = `
             <div class="dress-card-image">
-                ${
-                    safeImageUrl
-                    ? `<img
+                ${safeImageUrl
+                ? `<img
                         src="${escapeHTML(safeImageUrl)}"
                         alt="${escapeHTML(dress.name || "Dress photo")}"
                         loading="lazy"
                     >`
-                    : `<div class="dress-card-image-placeholder">
+                : `<div class="dress-card-image-placeholder">
                         No dress photo
                     </div>`
-                }
+            }
             </div>
 
             <div class="dress-card-content">
@@ -255,13 +254,12 @@ function renderInventory() {
                     <p><strong>Rental Price</strong><span>₱${Number(dress.price || 0).toLocaleString()}</span></p>
                 </div>
 
-                ${
-                    dress.notes
-                    ? `<div class="dress-notes">
+                ${dress.notes
+                ? `<div class="dress-notes">
                         ${escapeHTML(dress.notes)}
                     </div>`
-                    : ""
-                }
+                : ""
+            }
 
                 <div class="dress-actions">
                     <button
@@ -1766,7 +1764,7 @@ document.getElementById("reservationSearch")
 document.getElementById("reservationStatusFilter")
     ?.addEventListener("change", renderReservations);
 
-    document.getElementById("refreshReservationsButton")
+document.getElementById("refreshReservationsButton")
     ?.addEventListener("click", loadReservations);
 // ADD DRESS BUTTONS
 document.querySelectorAll("[data-open-add]").forEach(button => {
@@ -1968,11 +1966,15 @@ async function loadReservations() {
 
             return {
                 id: doc.name.split("/").pop(),
+                reservationId: getValue("reservationId"),
                 customerName: getValue("customerName"),
                 contact: getValue("contact"),
                 customerEmail: getValue("customerEmail"),
                 dressId: getValue("dressId"),
                 dressName: getValue("dressName"),
+                dressCode: getValue("dressCode"),
+                dressSize: getValue("dressSize"),
+                dressColor: getValue("dressColor"),
                 reservationDate: getValue("reservationDate"),
                 pickupDate: getValue("pickupDate"),
                 returnDate: getValue("returnDate"),
@@ -1994,6 +1996,7 @@ async function loadReservations() {
         `;
     }
 }
+
 
 
 function renderReservations() {
@@ -2030,7 +2033,12 @@ function renderReservations() {
     }
 
     tableBody.innerHTML = filtered.map(reservation => `
-        <tr>
+        <tr
+            class="clickable-reservation-row"
+            data-reservation-id="${escapeHTML(reservation.id)}"
+            tabindex="0"
+            title="Click to view reservation details"
+        >
             <td>${escapeHTML(reservation.id)}</td>
             <td>${escapeHTML(reservation.customerName)}</td>
             <td>${escapeHTML(reservation.dressName)}</td>
@@ -2044,15 +2052,50 @@ function renderReservations() {
             </td>
             <td>${escapeHTML(reservation.status)}</td>
             <td>
-                <button
-                    type="button"
-                    onclick="viewReservation('${escapeHTML(reservation.id)}')">
+                <button type="button" class="reservation-view-btn">
                     View
                 </button>
             </td>
         </tr>
     `).join("");
 }
+
+// Make the entire reservation row clickable
+const reservationsTableBody =
+    document.getElementById("reservationsTableBody");
+
+if (reservationsTableBody) {
+
+    reservationsTableBody.addEventListener("click", function(event) {
+        const row = event.target.closest(".clickable-reservation-row");
+
+        if (!row) return;
+
+        const reservationId = row.dataset.reservationId;
+
+        if (reservationId) {
+            viewReservation(reservationId);
+        }
+    });
+
+    // Allow keyboard users to open a reservation with Enter or Space
+    reservationsTableBody.addEventListener("keydown", function(event) {
+        const row = event.target.closest(".clickable-reservation-row");
+
+        if (!row) return;
+
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+
+            const reservationId = row.dataset.reservationId;
+
+            if (reservationId) {
+                viewReservation(reservationId);
+            }
+        }
+    });
+}
+
 
 
 function updateReservationCounts() {
@@ -2096,7 +2139,7 @@ function viewReservation(id) {
     }
 
     if (reference) {
-        reference.textContent = `Reference: ${reservation.id}`;
+        reference.textContent = `Reference: ${reservation.reservationId || reservation.id}`;
     }
 
     content.innerHTML = `
@@ -2171,6 +2214,21 @@ function viewReservation(id) {
                     </button>
                 </div>
             `
+            : reservation.status === "Confirmed"
+            ? `
+                <div class="reservation-admin-actions">
+                    <button
+                        type="button"
+                        class="primary-btn"
+                        onclick="generateConfirmationCard('${escapeHTML(reservation.id)}')">
+                        Generate Confirmation Card
+                    </button>
+                </div>
+
+                <p class="reservation-status-note">
+                    This reservation is confirmed.
+                </p>
+            `
             : `
                 <p class="reservation-status-note">
                     This reservation is already ${escapeHTML(reservation.status)}.
@@ -2183,7 +2241,57 @@ function viewReservation(id) {
     modal.setAttribute("aria-hidden", "false");
 }
 
+function generateConfirmationCard(id) {
+    const reservation = reservations.find(r => r.id === id);
 
+    if (!reservation || reservation.status !== "Confirmed") {
+        alert("Only confirmed reservations can generate a confirmation card.");
+        return;
+    }
+
+    const setCardText = (elementId, value) => {
+        const element = document.getElementById(elementId);
+        if (element) element.textContent = value || "—";
+    };
+
+    const money = value =>
+        `₱${Number(value || 0).toLocaleString("en-PH", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}`;
+
+    setCardText("cardReference", reservation.reservationId || reservation.id);
+    setCardText("cardCustomer", reservation.customerName);
+    setCardText("cardContact", reservation.contact);
+    setCardText("cardDress", reservation.dressName);
+    setCardText(
+        "cardSizeColor",
+        [reservation.dressSize, reservation.dressColor]
+            .filter(Boolean)
+            .join(" / ") || "—"
+    );
+    setCardText("cardPickup", reservation.pickupDate);
+    setCardText("cardReturn", reservation.returnDate);
+    setCardText("cardPrice", money(reservation.rentalPrice));
+    setCardText("cardDeposit", money(reservation.deposit));
+    setCardText("cardPaymentStatus", reservation.paymentStatus || "Unpaid");
+
+    const modal = document.getElementById("confirmationCardModal");
+
+    if (modal) {
+        modal.classList.add("active");
+        modal.setAttribute("aria-hidden", "false");
+    }
+}
+
+function closeConfirmationCard() {
+    const modal = document.getElementById("confirmationCardModal");
+
+    if (!modal) return;
+
+    modal.classList.remove("active");
+    modal.setAttribute("aria-hidden", "true");
+}
 function closeReservationDetails() {
     const modal = document.getElementById("reservationDetailsModal");
 
@@ -2291,10 +2399,74 @@ document.querySelectorAll("[data-close-reservation-details]")
     });
 
 
+// =========================================
+// CONFIRMATION CARD BUTTONS
+// =========================================
+
+// Close confirmation card modal
+document.querySelectorAll("[data-close-confirmation-card]")
+    .forEach(button => {
+        button.addEventListener("click", closeConfirmationCard);
+    });
+
+// Download confirmation card as PNG
+const downloadConfirmationCardButton =
+    document.getElementById("downloadConfirmationCard");
+
+if (downloadConfirmationCardButton) {
+    downloadConfirmationCardButton.addEventListener("click", async () => {
+        const card = document.getElementById("confirmationCard");
+
+        if (!card || typeof html2canvas !== "function") {
+            alert("Image export is unavailable. Please refresh the page and try again.");
+            return;
+        }
+
+        try {
+            downloadConfirmationCardButton.disabled = true;
+            downloadConfirmationCardButton.textContent = "Preparing Image...";
+
+            const canvas = await html2canvas(card, {
+                scale: 3,
+                backgroundColor: "#fbf7f2",
+                useCORS: true
+            });
+
+            const reference =
+                document.getElementById("cardReference")?.textContent || "reservation";
+
+            const safeReference = reference.replace(/[^a-z0-9-_]/gi, "-");
+
+            const link = document.createElement("a");
+            link.download = `Malea-Confirmation-${safeReference}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+
+        } catch (error) {
+            console.error("Confirmation card export error:", error);
+            alert("Unable to create the image. Please try again.");
+
+        } finally {
+            downloadConfirmationCardButton.disabled = false;
+            downloadConfirmationCardButton.textContent = "Download Image";
+        }
+    });
+}
+
+// Print confirmation card
+const printConfirmationCardButton =
+    document.getElementById("printConfirmationCard");
+
+if (printConfirmationCardButton) {
+    printConfirmationCardButton.addEventListener("click", () => {
+        window.print();
+    });
+}
+
 // Expose functions used by inline buttons
 window.viewReservation = viewReservation;
 window.updateReservationStatus = updateReservationStatus;
-
+window.generateConfirmationCard = generateConfirmationCard;
 
 // ==========================================
 // GLOBAL FUNCTIONS
