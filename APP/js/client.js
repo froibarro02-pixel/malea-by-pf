@@ -1002,12 +1002,10 @@ async function submitReservation(event) {
     <div id="maleaRequestCardMount"></div>
 
     <div class="mrr-actions">
-      <button type="button" class="button button-primary" id="downloadRequestCard">
-        Download Card
-      </button>
+   
 
       <button type="button" class="button button-outline" id="shareRequestCard">
-        Share Card
+        Download/Share
       </button>
 
       <button type="button" class="button button-outline" id="closeRequestCard">
