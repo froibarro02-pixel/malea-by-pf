@@ -541,31 +541,36 @@ function showRequestCard(data) {
     block: 'start'
   });
 
-  const renderCanvas = async () => {
-    if (typeof window.html2canvas !== 'function') {
-      throw new Error(
-        'The card image tool did not load. Please refresh and try again.'
-      );
-    }
-
-    return window.html2canvas(card, {
-  scale: 2,
-  backgroundColor: '#5a1f2a',
-  useCORS: true,
-  width: 480,
-  windowWidth: 480,
-  onclone: (clonedDocument) => {
-    const clonedCard = clonedDocument.querySelector('.malea-request-card');
-
-    if (clonedCard) {
-      clonedCard.style.width = '480px';
-      clonedCard.style.maxWidth = '480px';
-      clonedCard.style.minWidth = '480px';
-      clonedCard.style.boxSizing = 'border-box';
-    }
+  
+const renderCanvas = async () => {
+  if (typeof window.html2canvas !== 'function') {
+    throw new Error(
+      'The card image tool did not load. Please refresh and try again.'
+    );
   }
-});
-  };
+
+  return window.html2canvas(card, {
+    scale: 2,
+    backgroundColor: '#5a1f2a',
+    useCORS: true,
+    width: 480,
+    windowWidth: 600,
+    onclone: (clonedDocument) => {
+      const clonedCard = clonedDocument.querySelector(
+        '.malea-request-card'
+      );
+
+      if (clonedCard) {
+        clonedCard.style.width = '480px';
+        clonedCard.style.minWidth = '480px';
+        clonedCard.style.maxWidth = '480px';
+        clonedCard.style.padding = '32px';
+        clonedCard.style.boxSizing = 'border-box';
+        clonedCard.style.margin = '0';
+      }
+    }
+  });
+};
 
   $('downloadRequestCard').addEventListener('click', async () => {
     const button = $('downloadRequestCard');
