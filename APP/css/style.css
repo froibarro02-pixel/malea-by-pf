@@ -1812,3 +1812,13 @@ h2 em {
 .mrc-footer {
   border-top: 1px solid #956b73 !important;
 }
+#shareRequestCard {
+  background: #5a1f2a !important;
+  color: #fbf8f5 !important;
+  border: 1px solid #5a1f2a !important;
+}
+
+#shareRequestCard:hover {
+  background: #43151e !important;
+  border-color: #43151e !important;
+}

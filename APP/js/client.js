@@ -1002,7 +1002,6 @@ async function submitReservation(event) {
     <div id="maleaRequestCardMount"></div>
 
     <div class="mrr-actions">
-   
 
       <button type="button" class="button button-outline" id="shareRequestCard">
         Download/Share
@@ -1039,19 +1038,7 @@ async function submitReservation(event) {
     });
   }
 
-  $('downloadRequestCard').addEventListener('click', async () => {
-    try {
-      const canvas = await createCardImage();
-      const link = document.createElement('a');
 
-      link.download = `${reference}-MALEA-REQUEST.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-
-    } catch (error) {
-      setBookingMessage(error.message, 'error');
-    }
-  });
 
   $('shareRequestCard').addEventListener('click', async () => {
     try {
