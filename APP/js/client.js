@@ -166,10 +166,28 @@ function renderDresses() {
   const category = els.category.value;
   const size = els.size.value;
   const availability = els.availability.value;
-  state.filtered = state.dresses.filter(dress => {
-    const matchesQuery = [dress.name, dress.category, dress.size, dress.color, dress.notes].join(' ').toLowerCase().includes(query);
-    return matchesQuery && (category === 'all' || dress.category === category) && (size === 'all' || dress.size === size) && (availability === 'all' || dress.availability === availability);
-  });
+state.filtered = state.dresses
+  .filter(dress => {
+    const matchesQuery = [
+      dress.name,
+      dress.category,
+      dress.size,
+      dress.color,
+      dress.notes
+    ].join(' ').toLowerCase().includes(query);
+
+    return matchesQuery &&
+      (category === 'all' || dress.category === category) &&
+      (size === 'all' || dress.size === size) &&
+      (availability === 'all' || dress.availability === availability);
+  })
+  .sort((a, b) =>
+    String(a.name || '').localeCompare(
+      String(b.name || ''),
+      undefined,
+      { numeric: true, sensitivity: 'base' }
+    )
+  );
   els.count.textContent = `${state.filtered.length} ${state.filtered.length === 1 ? 'dress' : 'dresses'}`;
   els.grid.innerHTML = state.filtered.map(dress => `
     <article class="dress-card" data-dress-details="${escapeHTML(dress.id)}" tabindex="0" role="button" aria-label="View details for ${escapeHTML(dress.name)}">

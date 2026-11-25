@@ -1678,3 +1678,137 @@ h2 em {
     width: 100%;
   }
 }
+/* =========================================
+   MALEA CENTERED HERO DESIGN
+========================================= */
+
+.hero {
+  min-height: 570px;
+  padding: 90px 24px 75px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-copy {
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero .eyebrow {
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-size: clamp(48px, 6vw, 76px);
+  line-height: 1.12;
+}
+
+.hero-description {
+  max-width: 620px;
+  margin: 25px auto 30px;
+}
+
+.hero-actions {
+  justify-content: center;
+  gap: 25px;
+}
+
+.hero-note {
+  justify-content: center;
+  margin-top: 42px;
+}
+
+@media (max-width: 720px) {
+  .hero {
+    min-height: 500px;
+    padding: 75px 22px 60px;
+  }
+
+  .hero h1 {
+    font-size: 48px;
+  }
+
+  .hero-description {
+    font-size: 13px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .hero-note {
+    font-size: 10px;
+    text-align: center;
+  }
+}
+/* =========================================
+   MALEA BOOKING CARD — BURGUNDY THEME
+========================================= */
+
+.malea-request-card {
+  background: #5a1f2a !important;
+  color: #fbf8f5 !important;
+  border: 1px solid #8a5660 !important;
+  box-shadow: 0 12px 35px rgba(48, 20, 27, .2);
+}
+
+.mrc-top {
+  border-bottom: 1px solid #956b73 !important;
+}
+
+.mrc-brand,
+.malea-request-card h2,
+.mrc-ref strong,
+.mrc-dress div strong,
+.mrc-price,
+.mrc-footer {
+  color: #fbf8f5 !important;
+}
+
+.mrc-brand small,
+.mrc-eyebrow,
+.mrc-ref,
+.mrc-dress small,
+.mrc-grid small {
+  color: #e0cbd0 !important;
+}
+
+.mrc-status {
+  background: #fbf8f5 !important;
+  color: #5a1f2a !important;
+}
+
+.mrc-status small {
+  color: #80505a !important;
+}
+
+.mrc-dress {
+  background: #713542 !important;
+  border: 1px solid #956b73;
+}
+
+.mrc-dress span {
+  color: #eadde0 !important;
+}
+
+.mrc-grid strong {
+  color: #fbf8f5 !important;
+}
+
+.mrc-warning {
+  background: #fbf8f5 !important;
+  border-left: 3px solid #d7b9a0 !important;
+  color: #5a1f2a !important;
+}
+
+.mrc-footer {
+  border-top: 1px solid #956b73 !important;
+}
