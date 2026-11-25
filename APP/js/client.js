@@ -549,10 +549,22 @@ function showRequestCard(data) {
     }
 
     return window.html2canvas(card, {
-      scale: 2,
-      backgroundColor: '#fbf8f5',
-      useCORS: true
-    });
+  scale: 2,
+  backgroundColor: '#5a1f2a',
+  useCORS: true,
+  width: 480,
+  windowWidth: 480,
+  onclone: (clonedDocument) => {
+    const clonedCard = clonedDocument.querySelector('.malea-request-card');
+
+    if (clonedCard) {
+      clonedCard.style.width = '480px';
+      clonedCard.style.maxWidth = '480px';
+      clonedCard.style.minWidth = '480px';
+      clonedCard.style.boxSizing = 'border-box';
+    }
+  }
+});
   };
 
   $('downloadRequestCard').addEventListener('click', async () => {
