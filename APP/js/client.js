@@ -553,22 +553,8 @@ const renderCanvas = async () => {
     scale: 2,
     backgroundColor: '#5a1f2a',
     useCORS: true,
-    width: 480,
-    windowWidth: 600,
-    onclone: (clonedDocument) => {
-      const clonedCard = clonedDocument.querySelector(
-        '.malea-request-card'
-      );
-
-      if (clonedCard) {
-        clonedCard.style.width = '480px';
-        clonedCard.style.minWidth = '480px';
-        clonedCard.style.maxWidth = '480px';
-        clonedCard.style.padding = '32px';
-        clonedCard.style.boxSizing = 'border-box';
-        clonedCard.style.margin = '0';
-      }
-    }
+    scrollX: 0,
+    scrollY: 0
   });
 };
 

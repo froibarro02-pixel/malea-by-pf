@@ -1825,11 +1825,59 @@ h2 em {
 
 /* FIX: CONSISTENT RESERVATION CARD IMAGE LAYOUT */
 
+/* RESPONSIVE MALEA RESERVATION CARD */
+
 .malea-request-card {
-  width: 480px !important;
-  min-width: 480px !important;
-  max-width: 480px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
   box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.mrc-top {
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  min-width: 0;
+}
+
+.mrc-dress {
+  flex-direction: row !important;
+  min-width: 0;
+}
+
+.mrc-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.mrc-grid > div {
+  min-width: 0 !important;
+}
+
+.mrc-grid strong,
+.mrc-ref,
+.mrc-dress span {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+  .malea-request-card {
+    padding: 20px 16px !important;
+  }
+
+  .mrc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px 10px !important;
+  }
+
+  .mrc-brand {
+    font-size: 24px !important;
+  }
+
+  .malea-request-card h2 {
+    font-size: 21px !important;
+  }
 }
 
 .mrc-grid {
