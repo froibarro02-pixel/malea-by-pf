@@ -331,13 +331,23 @@
           </label>
 
           <label class="full">
-            Dress Photo
-            <input type="file" id="dressImage" accept="image/jpeg,image/png,image/webp">
-            <span class="image-upload-hint">JPG, PNG or WEBP · Maximum 5 MB</span>
-            <div id="dressImagePreview" class="dress-image-preview">
-              <span>Dress photo preview</span>
-            </div>
-          </label>
+    Dress Photos <span style="color:#9a353d">*</span>
+
+    <input
+        type="file"
+        id="dressImage"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+    >
+
+    <span class="image-upload-hint">
+        Upload multiple photos · Maximum 10 photos · JPG, PNG or WEBP · 5 MB each
+    </span>
+
+    <div id="dressImagePreview" class="dress-image-preview">
+        <span>Select photos to preview them here.</span>
+    </div>
+</label>
 
           <label class="full">
             Notes

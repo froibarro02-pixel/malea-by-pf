@@ -43,10 +43,11 @@ const ALLOWED_DRESS_IMAGE_TYPES = [
     "image/png",
     "image/webp"
 ];
-
 let currentDressImageUrl = "";
 let currentDressImagePublicId = "";
-let previewObjectUrl = "";
+let currentDressPhotos = [];
+
+const MAX_DRESS_PHOTOS = 10;
 
 const sidebar = document.getElementById("sidebar");
 const mobileMenu = document.getElementById("mobileMenu");
@@ -81,25 +82,61 @@ function firestoreValue(value) {
 function convertFirestoreDocument(document) {
     const fields = document.fields || {};
 
+    const imageUrl =
+        fields.imageUrl?.stringValue ||
+        fields.photoUrl?.stringValue ||
+        fields.imageURL?.stringValue ||
+        "";
+
+    const imagePublicId =
+        fields.imagePublicId?.stringValue || "";
+
+    const storedPhotos = fields.photos?.arrayValue?.values || [];
+
+    const photos = storedPhotos
+        .map(item => {
+            const photoFields = item.mapValue?.fields || {};
+
+            return {
+                url: photoFields.url?.stringValue || "",
+                publicId: photoFields.publicId?.stringValue || ""
+            };
+        })
+        .filter(photo => photo.url);
+
+    // Support existing dresses that only have one image.
+    if (!photos.length && imageUrl) {
+        photos.push({
+            url: imageUrl,
+            publicId: imagePublicId
+        });
+    }
+
     return {
-        id: document.name ? document.name.split("/").pop() : "",
+        id: document.name
+            ? document.name.split("/").pop()
+            : "",
+
         name: fields.name?.stringValue || "",
         category: fields.category?.stringValue || "",
         size: fields.size?.stringValue || "",
+
         price: Number(
             fields.price?.doubleValue ??
             fields.price?.integerValue ??
             0
         ),
-        availability: fields.availability?.stringValue || "Available",
+
+        availability:
+            fields.availability?.stringValue || "Available",
+
         color: fields.color?.stringValue || "",
         notes: fields.notes?.stringValue || "",
-        imageUrl:
-            fields.imageUrl?.stringValue ||
-            fields.photoUrl?.stringValue ||
-            fields.imageURL?.stringValue ||
-            "",
-        imagePublicId: fields.imagePublicId?.stringValue || "",
+
+        imageUrl,
+        imagePublicId,
+        photos,
+
         createdAt: fields.createdAt?.stringValue || "",
         updatedAt: fields.updatedAt?.stringValue || ""
     };
@@ -400,73 +437,187 @@ async function uploadDressImage(file) {
     };
 }
 
-
 // ==========================================
-// IMAGE PREVIEW
+// MULTIPLE IMAGE PREVIEW
 // ==========================================
 
 function clearImagePreviewUrl() {
-    if (previewObjectUrl) {
-        URL.revokeObjectURL(previewObjectUrl);
-        previewObjectUrl = "";
-    }
+    currentDressPhotos.forEach(photo => {
+        if (photo.file && photo.previewUrl) {
+            URL.revokeObjectURL(photo.previewUrl);
+        }
+    });
 }
 
-function showImagePreview(url) {
+function renderImagePreviews() {
     if (!dressImagePreview) return;
 
     dressImagePreview.innerHTML = "";
 
-    if (!url) {
+    if (!currentDressPhotos.length) {
         dressImagePreview.innerHTML =
-            "<span>Dress photo preview</span>";
+            "<span>Select photos to preview them here.</span>";
         return;
     }
 
-    const image = document.createElement("img");
-    image.src = url;
-    image.alt = "Dress preview";
+    currentDressPhotos.forEach((photo, index) => {
+        const item = document.createElement("div");
+        item.className = "dress-photo-item";
 
-    dressImagePreview.appendChild(image);
+        const image = document.createElement("img");
+        image.src = photo.previewUrl || photo.url;
+        image.alt = `Dress photo ${index + 1}`;
+
+        // TOP-RIGHT DELETE BUTTON
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "photo-delete-button";
+        deleteButton.dataset.photoRemove = index;
+        deleteButton.title = "Delete photo";
+        deleteButton.setAttribute("aria-label", "Delete photo");
+
+     deleteButton.textContent = "🗑";
+
+        // PHOTO LABEL AND REORDER CONTROLS
+        const controls = document.createElement("div");
+        controls.className = "dress-photo-controls";
+
+        const number = document.createElement("span");
+        number.textContent =
+            index === 0 ? "MAIN PHOTO" : `PHOTO ${index + 1}`;
+
+        const actions = document.createElement("div");
+
+        const up = document.createElement("button");
+        up.type = "button";
+        up.textContent = "↑";
+        up.disabled = index === 0;
+        up.dataset.photoUp = index;
+
+        const down = document.createElement("button");
+        down.type = "button";
+        down.textContent = "↓";
+        down.disabled = index === currentDressPhotos.length - 1;
+        down.dataset.photoDown = index;
+
+        actions.append(up, down);
+        controls.append(number, actions);
+
+        item.append(image, deleteButton, controls);
+        dressImagePreview.appendChild(item);
+    });
 }
 
 if (dressImage) {
     dressImage.addEventListener("change", () => {
-        const file = dressImage.files?.[0];
+        const selectedFiles = [...(dressImage.files || [])];
 
-        clearImagePreviewUrl();
-
-        if (!file) {
-            showImagePreview(currentDressImageUrl);
-            return;
-        }
-
-        if (!ALLOWED_DRESS_IMAGE_TYPES.includes(file.type)) {
-            showError("Please select a JPG, PNG, or WEBP image.");
+        if (
+            currentDressPhotos.length + selectedFiles.length >
+            MAX_DRESS_PHOTOS
+        ) {
+            showError("You can upload a maximum of 10 photos per dress.");
             dressImage.value = "";
-            showImagePreview(currentDressImageUrl);
             return;
         }
 
-        if (file.size > MAX_DRESS_IMAGE_SIZE) {
-            showError("Image must not exceed 5 MB.");
-            dressImage.value = "";
-            showImagePreview(currentDressImageUrl);
-            return;
+        for (const file of selectedFiles) {
+            if (!ALLOWED_DRESS_IMAGE_TYPES.includes(file.type)) {
+                showError("Please select JPG, PNG, or WEBP images only.");
+                dressImage.value = "";
+                return;
+            }
+
+            if (file.size > MAX_DRESS_IMAGE_SIZE) {
+                showError("Each image must not exceed 5 MB.");
+                dressImage.value = "";
+                return;
+            }
         }
 
-        previewObjectUrl = URL.createObjectURL(file);
-        showImagePreview(previewObjectUrl);
+        selectedFiles.forEach(file => {
+            currentDressPhotos.push({
+                url: "",
+                publicId: "",
+                file,
+                previewUrl: URL.createObjectURL(file)
+            });
+        });
+
+        dressImage.value = "";
+        renderImagePreviews();
     });
 }
 
+if (dressImagePreview) {
+    dressImagePreview.addEventListener("click", event => {
+
+        // DELETE INDIVIDUAL PHOTO
+        const removeButton = event.target.closest("[data-photo-remove]");
+
+        if (removeButton) {
+            const removeIndex = Number(removeButton.dataset.photoRemove);
+
+            if (
+                !Number.isInteger(removeIndex) ||
+                removeIndex < 0 ||
+                removeIndex >= currentDressPhotos.length
+            ) {
+                return;
+            }
+
+            const removed = currentDressPhotos.splice(removeIndex, 1)[0];
+
+            if (removed.file && removed.previewUrl) {
+                URL.revokeObjectURL(removed.previewUrl);
+            }
+
+            currentDressImageUrl = currentDressPhotos[0]?.url || "";
+            currentDressImagePublicId =
+                currentDressPhotos[0]?.publicId || "";
+
+            renderImagePreviews();
+            return;
+        }
+
+        // MOVE PHOTO UP OR DOWN
+        const upIndex = event.target.dataset.photoUp;
+        const downIndex = event.target.dataset.photoDown;
+
+        let index = -1;
+
+        if (upIndex !== undefined) {
+            index = Number(upIndex) - 1;
+        } else if (downIndex !== undefined) {
+            index = Number(downIndex) + 1;
+        }
+
+        if (index >= 0 && index < currentDressPhotos.length) {
+            const clickedIndex = upIndex !== undefined
+                ? Number(upIndex)
+                : Number(downIndex);
+
+            [
+                currentDressPhotos[clickedIndex],
+                currentDressPhotos[index]
+            ] = [
+                currentDressPhotos[index],
+                currentDressPhotos[clickedIndex]
+            ];
+
+            renderImagePreviews();
+        }
+    });
+}
 
 // ==========================================
 // OPEN ADD DRESS MODAL
 // ==========================================
-
 function openAddDressModal() {
     if (!dressForm || !dressModal) return;
+
+    clearImagePreviewUrl();
+    currentDressPhotos = [];
 
     dressForm.reset();
 
@@ -474,8 +625,7 @@ function openAddDressModal() {
     currentDressImageUrl = "";
     currentDressImagePublicId = "";
 
-    clearImagePreviewUrl();
-    showImagePreview("");
+    renderImagePreviews();
 
     const title = document.getElementById("modalTitle");
 
@@ -493,12 +643,13 @@ function openAddDressModal() {
 function closeDressModal() {
     if (!dressModal) return;
 
-    dressModal.classList.remove("active");
-    dressModal.setAttribute("aria-hidden", "true");
-
     clearImagePreviewUrl();
+    currentDressPhotos = [];
 
     if (dressImage) dressImage.value = "";
+
+    dressModal.classList.remove("active");
+    dressModal.setAttribute("aria-hidden", "true");
 }
 
 
@@ -507,33 +658,60 @@ function closeDressModal() {
 // ==========================================
 
 function editDress(id) {
-    const dress = dresses.find(item => item.id === id);
+    const dress = dresses.find(item => String(item.id) === String(id));
 
     if (!dress) {
+        console.error("Dress not found:", id, dresses);
         showError("Dress record not found.");
         return;
     }
 
+    // Populate dress information
     dressId.value = dress.id;
     dressName.value = dress.name || "";
     dressCategory.value = dress.category || "";
     dressSize.value = dress.size || "";
-    dressPrice.value = dress.price || "";
+    dressPrice.value = dress.price ?? "";
     dressAvailability.value = dress.availability || "Available";
     dressColor.value = dress.color || "";
     dressNotes.value = dress.notes || "";
 
-    currentDressImageUrl = dress.imageUrl || "";
-    currentDressImagePublicId = dress.imagePublicId || "";
-
-    if (dressImage) dressImage.value = "";
-
+    // Reset existing image previews
     clearImagePreviewUrl();
-    showImagePreview(currentDressImageUrl);
+
+    // Load existing photos
+    currentDressPhotos = (dress.photos || [])
+        .map(photo => ({
+            url: photo.url,
+            publicId: photo.publicId || "",
+            file: null,
+            previewUrl: ""
+        }));
+
+    // Backward compatibility for older dresses
+    if (!currentDressPhotos.length && dress.imageUrl) {
+        currentDressPhotos = [{
+            url: dress.imageUrl,
+            publicId: dress.imagePublicId || "",
+            file: null,
+            previewUrl: ""
+        }];
+    }
+
+    currentDressImageUrl = currentDressPhotos[0]?.url || "";
+    currentDressImagePublicId = currentDressPhotos[0]?.publicId || "";
+
+    if (dressImage) {
+        dressImage.value = "";
+    }
+
+    renderImagePreviews();
 
     const title = document.getElementById("modalTitle");
 
-    if (title) title.textContent = "Edit Dress";
+    if (title) {
+        title.textContent = "Edit Dress";
+    }
 
     dressModal.classList.add("active");
     dressModal.setAttribute("aria-hidden", "false");
@@ -581,7 +759,20 @@ async function removeDress(id) {
 // ==========================================
 // SAVE DRESS
 // ==========================================
-
+function firestorePhotosValue(photos) {
+    return {
+        arrayValue: {
+            values: photos.map(photo => ({
+                mapValue: {
+                    fields: {
+                        url: firestoreValue(photo.url),
+                        publicId: firestoreValue(photo.publicId)
+                    }
+                }
+            }))
+        }
+    };
+}
 async function saveDress(event) {
     event.preventDefault();
 
@@ -605,22 +796,54 @@ async function saveDress(event) {
         return;
     }
 
+    if (
+        currentDressPhotos.length === 0 ||
+        currentDressPhotos.length > MAX_DRESS_PHOTOS
+    ) {
+        showError("Please provide 1 to 10 dress photos.");
+        return;
+    }
+
     if (saveDressButton) {
         saveDressButton.disabled = true;
-        saveDressButton.textContent = "Saving...";
+        saveDressButton.textContent = "Uploading photos...";
     }
 
     try {
-        let imageUrl = currentDressImageUrl;
-        let imagePublicId = currentDressImagePublicId;
+        const uploadedPhotos = [];
 
-        const selectedFile = dressImage?.files?.[0];
+        for (let i = 0; i < currentDressPhotos.length; i++) {
+            const photo = currentDressPhotos[i];
 
-        if (selectedFile) {
-            const uploaded = await uploadDressImage(selectedFile);
-            imageUrl = uploaded.url;
-            imagePublicId = uploaded.publicId;
+            let uploadedPhoto;
+
+            if (photo.file) {
+                uploadedPhoto = await uploadDressImage(photo.file);
+            } else {
+                uploadedPhoto = {
+                    url: photo.url,
+                    publicId: photo.publicId || ""
+                };
+            }
+
+            if (!uploadedPhoto.url) {
+                throw new Error(`Photo ${i + 1} could not be uploaded.`);
+            }
+
+            uploadedPhotos.push({
+                url: uploadedPhoto.url,
+                publicId: uploadedPhoto.publicId
+            });
+
+            if (saveDressButton) {
+                saveDressButton.textContent =
+                    `Uploading ${i + 1}/${currentDressPhotos.length}...`;
+            }
         }
+
+        // First photo is the main inventory image.
+        const imageUrl = uploadedPhotos[0].url;
+        const imagePublicId = uploadedPhotos[0].publicId;
 
         const now = new Date().toISOString();
 
@@ -632,22 +855,49 @@ async function saveDress(event) {
             availability: firestoreValue(availability),
             color: firestoreValue(color),
             notes: firestoreValue(notes),
+
             imageUrl: firestoreValue(imageUrl),
             imagePublicId: firestoreValue(imagePublicId),
+
+            photos: firestorePhotosValue(uploadedPhotos),
+
             updatedAt: firestoreValue(now)
         };
 
         let response;
 
         if (editingId) {
+            const updateFields = [
+                "name",
+                "category",
+                "size",
+                "price",
+                "availability",
+                "color",
+                "notes",
+                "imageUrl",
+                "imagePublicId",
+                "photos",
+                "updatedAt"
+            ];
+
+            const updateMask = updateFields
+                .map(field =>
+                    `updateMask.fieldPaths=${encodeURIComponent(field)}`
+                )
+                .join("&");
+
             response = await fetch(
-                `${FIRESTORE_URL}/${encodeURIComponent(editingId)}?key=${API_KEY}&updateMask.fieldPaths=name&updateMask.fieldPaths=category&updateMask.fieldPaths=size&updateMask.fieldPaths=price&updateMask.fieldPaths=availability&updateMask.fieldPaths=color&updateMask.fieldPaths=notes&updateMask.fieldPaths=imageUrl&updateMask.fieldPaths=imagePublicId&updateMask.fieldPaths=updatedAt`,
+                `${FIRESTORE_URL}/${encodeURIComponent(editingId)}?key=${API_KEY}&${updateMask}`,
                 {
                     method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
                     body: JSON.stringify({ fields })
                 }
             );
+
         } else {
             fields.createdAt = firestoreValue(now);
 
@@ -655,7 +905,9 @@ async function saveDress(event) {
                 `${FIRESTORE_URL}?key=${API_KEY}`,
                 {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
                     body: JSON.stringify({ fields })
                 }
             );
@@ -669,8 +921,8 @@ async function saveDress(event) {
 
         alert(
             editingId
-                ? "Dress updated successfully."
-                : "Dress added successfully."
+                ? "Dress and photos updated successfully."
+                : "Dress and photos added successfully."
         );
 
         closeDressModal();
@@ -678,7 +930,10 @@ async function saveDress(event) {
 
     } catch (error) {
         console.error("Save error:", error);
-        showError("Unable to save the dress.\n\n" + error.message);
+
+        showError(
+            "Unable to save the dress.\n\n" + error.message
+        );
 
     } finally {
         if (saveDressButton) {
@@ -708,39 +963,70 @@ let lastImportedDressIds = [];
 
 function loadLastImportHistory() {
     try {
-        const saved = localStorage.getItem(LAST_IMPORT_STORAGE_KEY);
-        lastImportedDressIds = saved ? JSON.parse(saved) : [];
+        const saved = JSON.parse(
+            localStorage.getItem(LAST_IMPORT_STORAGE_KEY) || "{}"
+        );
 
-        if (!Array.isArray(lastImportedDressIds)) {
+        lastImportedDressIds = Array.isArray(saved.ids)
+            ? saved.ids
+            : [];
+
+        lastImportTimestamp = saved.importedAt || null;
+
+        if (
+            !lastImportedDressIds.length ||
+            !lastImportTimestamp ||
+            Date.now() - lastImportTimestamp >= 24 * 60 * 60 * 1000
+        ) {
             lastImportedDressIds = [];
+            lastImportTimestamp = null;
+            localStorage.removeItem(LAST_IMPORT_STORAGE_KEY);
         }
     } catch (error) {
-        console.error("Unable to load import history:", error);
         lastImportedDressIds = [];
+        lastImportTimestamp = null;
     }
 
     updateUndoImportButton();
 }
 
 function saveLastImportHistory() {
-    try {
-        localStorage.setItem(
-            LAST_IMPORT_STORAGE_KEY,
-            JSON.stringify(lastImportedDressIds)
-        );
-    } catch (error) {
-        console.error("Unable to save import history:", error);
+    if (!lastImportedDressIds.length) {
+        localStorage.removeItem(LAST_IMPORT_STORAGE_KEY);
+        updateUndoImportButton();
+        return;
     }
+
+    if (!lastImportTimestamp) {
+        lastImportTimestamp = Date.now();
+    }
+
+    localStorage.setItem(
+        LAST_IMPORT_STORAGE_KEY,
+        JSON.stringify({
+            ids: lastImportedDressIds,
+            importedAt: lastImportTimestamp
+        })
+    );
 
     updateUndoImportButton();
 }
 
 function updateUndoImportButton() {
     const button = document.getElementById("undoLastImportButton");
-
     if (!button) return;
 
-    button.disabled = lastImportedDressIds.length === 0;
+    const expired =
+        !lastImportTimestamp ||
+        Date.now() - lastImportTimestamp >= 24 * 60 * 60 * 1000;
+
+    if (expired) {
+        lastImportedDressIds = [];
+        lastImportTimestamp = null;
+        localStorage.removeItem(LAST_IMPORT_STORAGE_KEY);
+    }
+
+    button.disabled = !lastImportedDressIds.length;
 
     button.textContent = lastImportedDressIds.length
         ? `↶ Undo Last Import (${lastImportedDressIds.length})`
@@ -1637,6 +1923,18 @@ async function confirmBulkImport() {
 // ==========================================
 
 async function undoLastImport() {
+    if (
+        !lastImportTimestamp ||
+        Date.now() - lastImportTimestamp >= 24 * 60 * 60 * 1000
+    ) {
+        lastImportedDressIds = [];
+        lastImportTimestamp = null;
+        localStorage.removeItem(LAST_IMPORT_STORAGE_KEY);
+        updateUndoImportButton();
+
+        alert("The 24-hour undo period has expired.");
+        return;
+    }
     if (!lastImportedDressIds.length) {
         alert("There is no recent import to undo.");
         return;
@@ -1785,21 +2083,36 @@ if (dressForm) {
 
 
 // EDIT / DELETE BUTTONS
+// ==========================================
+// EDIT / DELETE BUTTONS
+// ==========================================
+
 if (inventoryGrid) {
     inventoryGrid.addEventListener("click", event => {
+
         const editButton = event.target.closest("[data-edit-dress]");
         const deleteButton = event.target.closest("[data-delete-dress]");
 
-        if (editButton) {
-            editDress(editButton.dataset.editDress);
+        if (editButton && inventoryGrid.contains(editButton)) {
+            event.preventDefault();
+
+            const id = editButton.getAttribute("data-edit-dress");
+
+            console.log("Editing dress:", id);
+
+            editDress(id);
+            return;
         }
 
-        if (deleteButton) {
-            removeDress(deleteButton.dataset.deleteDress);
+        if (deleteButton && inventoryGrid.contains(deleteButton)) {
+            event.preventDefault();
+
+            removeDress(
+                deleteButton.getAttribute("data-delete-dress")
+            );
         }
     });
 }
-
 
 // SIDEBAR NAVIGATION
 navItems.forEach(button => {
@@ -2066,7 +2379,7 @@ const reservationsTableBody =
 
 if (reservationsTableBody) {
 
-    reservationsTableBody.addEventListener("click", function(event) {
+    reservationsTableBody.addEventListener("click", function (event) {
         const row = event.target.closest(".clickable-reservation-row");
 
         if (!row) return;
@@ -2079,7 +2392,7 @@ if (reservationsTableBody) {
     });
 
     // Allow keyboard users to open a reservation with Enter or Space
-    reservationsTableBody.addEventListener("keydown", function(event) {
+    reservationsTableBody.addEventListener("keydown", function (event) {
         const row = event.target.closest(".clickable-reservation-row");
 
         if (!row) return;
@@ -2195,8 +2508,7 @@ function viewReservation(id) {
             </div>
         </div>
 
-        ${
-            reservation.status === "Pending"
+        ${reservation.status === "Pending"
             ? `
                 <div class="reservation-admin-actions">
                     <button
@@ -2215,7 +2527,7 @@ function viewReservation(id) {
                 </div>
             `
             : reservation.status === "Confirmed"
-            ? `
+                ? `
                 <div class="reservation-admin-actions">
                     <button
                         type="button"
@@ -2229,7 +2541,7 @@ function viewReservation(id) {
                     This reservation is confirmed.
                 </p>
             `
-            : `
+                : `
                 <p class="reservation-status-note">
                     This reservation is already ${escapeHTML(reservation.status)}.
                 </p>

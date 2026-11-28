@@ -64,60 +64,67 @@ function normalizeStatus(raw) {
   return 'Available';
 }
 function normalizeDress(doc) {
-  const fields = convertFields(doc.fields || {});
+    const fields = convertFields(doc.fields || {});
 
-  const name = fields.name || fields.dressName || 'Untitled dress';
-  const priceValue = fields.price ?? fields.rentalPrice ?? '';
+    const name = fields.name || fields.dressName || 'Untitled dress';
+    const priceValue = fields.price ?? fields.rentalPrice ?? '';
 
-  const image =
-    fields.photo ||
-    fields.imageUrl ||
-    fields.image ||
-    fields.photoUrl ||
-    fields.imageURL ||
-    '';
+    const mainImage =
+        fields.imageUrl ||
+        fields.photoUrl ||
+        fields.imageURL ||
+        fields.photo ||
+        fields.image ||
+        '';
 
-  const gallerySource =
-    fields.photos ||
-    fields.images ||
-    fields.gallery ||
-    fields.imageUrls ||
-    fields.additionalPhotos ||
-    [];
+    const gallerySource =
+        fields.photos ||
+        fields.images ||
+        fields.gallery ||
+        fields.imageUrls ||
+        fields.additionalPhotos ||
+        [];
 
-  const gallery = Array.isArray(gallerySource)
-    ? gallerySource.map(item => {
-        if (typeof item === 'string') return item;
+    const gallery = Array.isArray(gallerySource)
+        ? gallerySource.map(item => {
+            if (typeof item === 'string') return item;
 
-        if (item && typeof item === 'object') {
-          return item.url || item.imageUrl || item.src || '';
-        }
+            if (item && typeof item === 'object') {
+                return item.url || item.imageUrl || item.src || '';
+            }
 
-        return '';
-      }).filter(Boolean)
-    : [];
+            return '';
+        }).filter(Boolean)
+        : [];
 
-  const imageList = [
-    ...new Set([
-      ...(typeof image === 'string' ? [image] : []),
-      ...gallery
-    ])
-  ];
+    const images = [
+        ...new Set([
+            ...(typeof mainImage === 'string' ? [mainImage] : []),
+            ...gallery
+        ])
+    ];
 
-  return {
-    id: (doc.name || '').split('/').pop(),
-    code: String(fields.dressCode || fields.code || fields.dressCodeNumber || (doc.name || '').split('/').pop()),
-    name: String(name),
-    category: String(fields.category || 'Dress'),
-    size: String(fields.size || 'Not specified'),
-    price: priceValue,
-    color: String(fields.color || 'Not specified'),
-    notes: String(fields.notes || fields.description || ''),
-    image: typeof image === 'string' ? image : '',
-    images: imageList,
-    availability: normalizeStatus(fields.availability || fields.status || 'Available'),
-    raw: fields
-  };
+    return {
+        id: (doc.name || '').split('/').pop(),
+        code: String(
+            fields.dressCode ||
+            fields.code ||
+            fields.dressCodeNumber ||
+            (doc.name || '').split('/').pop()
+        ),
+        name: String(name),
+        category: String(fields.category || 'Dress'),
+        size: String(fields.size || 'Not specified'),
+        price: priceValue,
+        color: String(fields.color || 'Not specified'),
+        notes: String(fields.notes || fields.description || ''),
+        image: mainImage,
+        images,
+        availability: normalizeStatus(
+            fields.availability || fields.status || 'Available'
+        ),
+        raw: fields
+    };
 }
 function formatPrice(value) {
   if (value === '' || value == null) return 'Ask for price';
@@ -205,68 +212,90 @@ state.filtered = state.dresses
   els.empty.classList.toggle('hidden', state.filtered.length > 0);
   els.grid.classList.toggle('hidden', state.filtered.length === 0);
 }
+
+
 function renderDressGallery() {
-  const photoWrap = $('detailsPhotoWrap');
-  const photos = state.selectedPhotos;
-  const index = state.selectedPhotoIndex;
-  const url = photos[index] || '';
+    const photoWrap = $('detailsPhotoWrap');
+    const photos = state.selectedPhotos;
+    const index = state.selectedPhotoIndex;
+    const url = photos[index] || '';
 
-  photoWrap.innerHTML = `
-    ${
-      url
-        ? `<img class="details-photo"
-             src="${escapeHTML(url)}"
-             alt="${escapeHTML(state.selectedDress?.name || 'Dress photo')} - photo ${index + 1}"
-             draggable="false">`
-        : '<div class="details-photo-placeholder">MALEA</div>'
-    }
+    photoWrap.innerHTML = `
+        ${
+            url
+                ? `<img
+                    class="details-photo"
+                    src="${escapeHTML(url)}"
+                    alt="${escapeHTML(state.selectedDress?.name || 'Dress photo')} - photo ${index + 1}"
+                    draggable="false"
+                    onerror="this.style.display='none'">`
+                : '<div class="details-photo-placeholder">MALEA</div>'
+        }
 
-    <div class="gallery-controls">
-      <button type="button"
-        class="gallery-arrow"
-        data-gallery-prev
-        aria-label="Previous photo"
-        ${photos.length < 2 ? 'disabled' : ''}>‹</button>
+        ${
+            photos.length > 1
+                ? `
+                    <div class="gallery-controls">
+                        <button
+                            type="button"
+                            class="gallery-arrow"
+                            data-gallery-prev
+                            aria-label="Previous photo">‹</button>
 
-      <button type="button"
-        class="gallery-arrow"
-        data-gallery-next
-        aria-label="Next photo"
-        ${photos.length < 2 ? 'disabled' : ''}>›</button>
-    </div>
+                        <button
+                            type="button"
+                            class="gallery-arrow"
+                            data-gallery-next
+                            aria-label="Next photo">›</button>
+                    </div>
+                `
+                : ''
+        }
 
-    <span class="gallery-counter">
-      ${photos.length ? `${index + 1} / ${photos.length}` : 'No photo'}
-    </span>
+        <span class="gallery-counter">
+            ${photos.length ? `${index + 1} / ${photos.length}` : 'No photo'}
+        </span>
 
-    <button type="button"
-      class="gallery-download"
-      data-gallery-download
-      ${url ? '' : 'disabled'}>
-      ↓ Download photo
-    </button>
-  `;
+        ${
+            photos.length > 1
+                ? `
+                    <div class="gallery-dots">
+                        ${photos.map((photo, i) => `
+                            <button
+                                type="button"
+                                class="gallery-dot ${i === index ? 'active' : ''}"
+                                data-gallery-dot="${i}"
+                                aria-label="Show photo ${i + 1}">
+                            </button>
+                        `).join('')}
+                    </div>
+                `
+                : ''
+        }
+    `;
 }
+
+
 function findDress(id) { return state.dresses.find(dress => dress.id === id) || null; }
+
 function openDressDetails(dress) {
-  state.selectedDress = dress;
-  state.selectedPhotos = (dress.images || [dress.image])
-  .map(safeImageUrl)
-  .filter(Boolean);
-
-if (!state.selectedPhotos.length && safeImageUrl(dress.image)) {
-  state.selectedPhotos = [safeImageUrl(dress.image)];
-}
-
-state.selectedPhotoIndex = 0;
-
-renderDressGallery();
   if (!dress) return;
+
   state.selectedDress = dress;
-  const photoWrap = $('detailsPhotoWrap');
-  photoWrap.innerHTML = imageMarkup(dress, 'details-photo');
-  const photo = photoWrap.querySelector('img');
-  if (photo) { photo.style.width = '100%'; photo.style.height = '100%'; photo.style.minHeight = '430px'; photo.style.objectFit = 'cover'; }
+
+  state.selectedPhotos = (dress.images || [dress.image])
+    .map(safeImageUrl)
+    .filter(Boolean);
+
+  if (!state.selectedPhotos.length && safeImageUrl(dress.image)) {
+    state.selectedPhotos = [safeImageUrl(dress.image)];
+  }
+
+  state.selectedPhotoIndex = 0;
+
+  // Render the multi-photo gallery
+  renderDressGallery();
+
   $('detailsCategory').textContent = dress.category;
   $('detailsName').textContent = dress.name;
   $('detailsNotes').textContent = dress.notes || 'A lovely choice for your next special occasion.';
@@ -274,20 +303,31 @@ renderDressGallery();
   $('detailsSize').textContent = dress.size || 'Not specified';
   $('detailsColor').textContent = dress.color || 'Not specified';
   $('detailsAvailability').textContent = dress.availability;
+
   const statusButton = $('detailsStatus');
   statusButton.textContent = dress.availability;
   statusButton.className = `availability-pill ${statusClass(dress.availability)}`;
-  statusButton.setAttribute('aria-label', `Availability status: ${dress.availability}. Availability is checked for your dates.`);
-  $('detailsBookingNote').textContent = dress.availability === 'Reserved'
-    ? 'This dress has a Reserved status. You may send a request, but the server must verify that your dates do not conflict.'
-    : dress.availability === 'Borrowed' || dress.availability === 'Unavailable'
-      ? 'This dress cannot currently be reserved. Please choose another dress.'
-      : 'Availability is checked against your selected dates when you submit a reservation request.';
+  statusButton.setAttribute(
+    'aria-label',
+    `Availability status: ${dress.availability}. Availability is checked for your dates.`
+  );
+
+  $('detailsBookingNote').textContent =
+    dress.availability === 'Reserved'
+      ? 'This dress has a Reserved status. You may send a request, but the server must verify that your dates do not conflict.'
+      : dress.availability === 'Borrowed' || dress.availability === 'Unavailable'
+        ? 'This dress cannot currently be reserved. Please choose another dress.'
+        : 'Availability is checked against your selected dates when you submit a reservation request.';
+
   const reserveButton = $('detailsReserve');
   reserveButton.disabled = !canRequest(dress);
-  reserveButton.textContent = canRequest(dress) ? 'Reserve this dress' : 'Currently unavailable';
+  reserveButton.textContent = canRequest(dress)
+    ? 'Reserve this dress'
+    : 'Currently unavailable';
+
   openModal(els.detailsModal);
 }
+
 async function downloadCurrentDressPhoto() {
   const url = state.selectedPhotos[state.selectedPhotoIndex];
 
@@ -1157,30 +1197,46 @@ document.addEventListener('DOMContentLoaded', () => {
   // Dress gallery: previous, next, and download buttons
   const photoWrap = $('detailsPhotoWrap');
 
-  photoWrap.addEventListener('click', event => {
+
+photoWrap.addEventListener('click', event => {
+  const dot = event.target.closest('[data-gallery-dot]');
+
+  if (dot) {
+    const photoIndex = Number(dot.dataset.galleryDot);
+
     if (
-      event.target.closest('[data-gallery-prev]') &&
-      state.selectedPhotos.length > 1
+      Number.isInteger(photoIndex) &&
+      photoIndex >= 0 &&
+      photoIndex < state.selectedPhotos.length
     ) {
-      state.selectedPhotoIndex =
-        (state.selectedPhotoIndex - 1 + state.selectedPhotos.length) %
-        state.selectedPhotos.length;
-
+      state.selectedPhotoIndex = photoIndex;
       renderDressGallery();
-
-    } else if (
-      event.target.closest('[data-gallery-next]') &&
-      state.selectedPhotos.length > 1
-    ) {
-      state.selectedPhotoIndex =
-        (state.selectedPhotoIndex + 1) % state.selectedPhotos.length;
-
-      renderDressGallery();
-
-    } else if (event.target.closest('[data-gallery-download]')) {
-      downloadCurrentDressPhoto();
     }
-  });
+
+  } else if (
+    event.target.closest('[data-gallery-prev]') &&
+    state.selectedPhotos.length > 1
+  ) {
+    state.selectedPhotoIndex =
+      (state.selectedPhotoIndex - 1 + state.selectedPhotos.length) %
+      state.selectedPhotos.length;
+
+    renderDressGallery();
+
+  } else if (
+    event.target.closest('[data-gallery-next]') &&
+    state.selectedPhotos.length > 1
+  ) {
+    state.selectedPhotoIndex =
+      (state.selectedPhotoIndex + 1) % state.selectedPhotos.length;
+
+    renderDressGallery();
+
+  } else if (event.target.closest('[data-gallery-download]')) {
+    downloadCurrentDressPhoto();
+  }
+});
+
 
   // Swipe support for mobile devices
   let galleryTouchStartX = 0;
